@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Compras Mensais</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #0056b3;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #scanButton {
+            background-color: #007bff;
+        }
+        #scanButton:hover {
+            background-color: #0056b3;
+        }
+        #exportButton {
+            background-color: #6c757d;
+        }
+        #exportButton:hover {
+            background-color: #5a6268;
+        }
+        #filterSection {
+            background-color: #e0f7fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        #filterSection input {
+            width: auto;
+            margin-right: 10px;
+        }
+        .filter-controls {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        #historico {
+            margin-top: 30px;
+        }
+        #listaCompras {
+            list-style: none;
+            padding: 0;
+        }
+        #listaCompras li {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        .total {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            color: #dc3545;
+        }
+        /* Modal para o Leitor de Código de Barras */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; 
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #reader {
+            width: 100%;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Controle de Compras Mensais</h1>
+
+    <div id="filterSection">
+        <h2>📊 Análise por Período</h2>
+        <div class="filter-controls">
+            <div class="form-group">
+                <label for="startDateFilter">De:</label>
+                <input type="date" id="startDateFilter">
+            </div>
+            <div class="form-group">
+                <label for="endDateFilter">Até:</label>
+                <input type="date" id="endDateFilter">
+            </div>
+            <button type="button" id="filterButton">Filtrar</button>
+            <button type="button" id="resetFilterButton" style="background-color: #ffc107; color: #333;">Limpar Filtro</button>
+        </div>
+    </div>
+    
+    <hr>
+
+    <h2>Adicionar Nova Compra</h2>
+    <form id="addCompraForm">
+        <div class="form-group">
+            <label for="produto">Produto (ou GTIN do escaneamento):</label>
+            <input type="text" id="produto" required>
+        </div>
+        <div class="form-group">
+            <label for="gtin">Código de Barras (GTIN):</label>
+            <input type="text" id="gtin" placeholder="Será preenchido pelo escaneamento ou digitado">
+        </div>
+        <div class="form-group">
+            <label for="preco">Preço (R$):</label>
+            <input type="number" id="preco" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="local">Local da Compra:</label>
+            <input type="text" id="local" placeholder="Ex: Supermercado X">
+        </div>
+        <div class="form-group">
+            <label for="dataCompra">Data:</label>
+            <input type="date" id="dataCompra" required>
+        </div>
+        
+        <button type="submit" id="addCompraButton">Adicionar Compra</button>
+        <button type="button" id="scanButton">Escanear Código de Barras</button>
+        <button type="button" id="exportButton">Exportar CSV</button>
+    </form>
+    
+    <hr>
+
+    <div id="historico">
+        <h2>Histórico de Compras</h2>
+        <p class="total">Total Gasto no Período: <span id="totalGasto">R$ 0,00</span></p>
+        <ul id="listaCompras">
+            </ul>
+    </div>
+</div>
+
+<div id="barcodeModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Escaneamento de Código de Barras</h2>
+        <div id="reader"></div>
+        <p id="scanResult"></p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('addCompraForm');
+        const listaCompras = document.getElementById('listaCompras');
+        const totalGastoSpan = document.getElementById('totalGasto');
+        const scanButton = document.getElementById('scanButton');
+        const exportButton = document.getElementById('exportButton');
+        const filterButton = document.getElementById('filterButton');
+        const resetFilterButton = document.getElementById('resetFilterButton');
+        const startDateFilter = document.getElementById('startDateFilter');
+        const endDateFilter = document.getElementById('endDateFilter');
+        const barcodeModal = document.getElementById('barcodeModal');
+        const closeSpan = document.querySelector('.close');
+        const produtoInput = document.getElementById('produto');
+        const gtinInput = document.getElementById('gtin');
+        const precoInput = document.getElementById('preco');
+        const localInput = document.getElementById('local');
+        const dataCompraInput = document.getElementById('dataCompra');
+
+        let compras = JSON.parse(localStorage.getItem('comprasMensais')) || [];
+        let html5QrcodeScanner;
+
+        // Mock data (dados simulados para demonstração)
+        const mockCatalog = {
+            "7891000123456": { nome: "Biscoito Recheado Choco. Marca X 130g", preco: 3.50, local: "Supermercado A" },
+            "7892000678901": { nome: "Arroz Agulhinha Tipo 1, 5kg", preco: 25.90, local: "Atacado Y" },
+            "7893000246802": { nome: "Leite Integral UHT 1L", preco: 4.99, local: "Mercado Z" }
+        };
+
+        // Função para salvar no Local Storage
+        const saveCompras = () => {
+            localStorage.setItem('comprasMensais', JSON.stringify(compras));
+        };
+
+        // Função para renderizar a lista e calcular o total (AGORA ACEITA UM ARRAY PARA FILTRAGEM)
+        const renderCompras = (comprasParaRenderizar = compras) => {
+            listaCompras.innerHTML = '';
+            let total = 0;
+            
+            // Ordena por data decrescente (mais recente primeiro)
+            comprasParaRenderizar.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            comprasParaRenderizar.forEach((compra, index) => {
+                total += parseFloat(compra.preco);
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    **${compra.produto}** (${compra.gtin || 'Sem GTIN'}) | R$ ${compra.preco.toFixed(2)} | ${compra.local} | ${compra.data}
+                    <button onclick="removerCompra('${compra.data}', '${compra.gtin}', ${compra.preco})">Remover</button>
+                `;
+                listaCompras.appendChild(li);
+            });
+
+            totalGastoSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            saveCompras(); // Salva sempre o array COMPLETO no Local Storage
+        };
+
+        // Função global para remover item (usa múltiplos atributos para encontrar o item correto)
+        window.removerCompra = (data, gtin, preco) => {
+             // Encontra o índice do item original a ser removido no array 'compras'
+            const originalIndex = compras.findIndex(c => 
+                c.data === data && 
+                c.gtin === gtin && 
+                c.preco === preco
+            );
+
+            if (originalIndex > -1) {
+                 compras.splice(originalIndex, 1);
+            }
+            // Após a remoção no array principal, re-renderiza com o filtro atual
+            aplicarFiltro();
+        };
+
+        // Adicionar nova compra
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const novaCompra = {
+                data: dataCompraInput.value,
+                produto: produtoInput.value,
+                gtin: gtinInput.value || '',
+                preco: parseFloat(precoInput.value),
+                local: localInput.value
+            };
+
+            compras.push(novaCompra);
+            form.reset();
+            dataCompraInput.valueAsDate = new Date(); 
+            aplicarFiltro(); // Renderiza o histórico com o filtro aplicado (ou sem filtro)
+        });
+
+        // ------------------ FUNÇÕES DE FILTRO POR DATA (NOVO) ------------------
+
+        const aplicarFiltro = () => {
+            const startDate = startDateFilter.value;
+            const endDate = endDateFilter.value;
+
+            if (!startDate && !endDate) {
+                renderCompras(compras); // Sem filtro
+                return;
+            }
+
+            const dataInicial = startDate ? new Date(startDate + 'T00:00:00') : new Date('1900-01-01T00:00:00');
+            const dataFinal = endDate ? new Date(endDate + 'T23:59:59') : new Date('2900-01-01T23:59:59');
+
+            const comprasFiltradas = compras.filter(compra => {
+                const dataCompra = new Date(compra.data + 'T00:00:00');
+                return dataCompra >= dataInicial && dataCompra <= dataFinal;
+            });
+
+            renderCompras(comprasFiltradas);
+        };
+
+        filterButton.addEventListener('click', aplicarFiltro);
+        
+        resetFilterButton.addEventListener('click', () => {
+            startDateFilter.value = '';
+            endDateFilter.value = '';
+            aplicarFiltro(); // Renderiza tudo
+        });
+
+        // ------------------ FUNÇÃO DE EXPORTAÇÃO CSV (NOVO) ------------------
+
+        const exportarCSV = () => {
+            if (compras.length === 0) {
+                alert("Não há dados de compra para exportar.");
+                return;
+            }
+
+            // Define os cabeçalhos do CSV
+            const headers = ["Data", "Produto", "GTIN", "Preco", "Local"];
+            let csvContent = headers.join(";") + "\n";
+
+            // Converte os dados para linhas CSV
+            compras.forEach(compra => {
+                const precoFormatado = compra.preco.toFixed(2).replace('.', ','); // Formata para padrão BR (vírgula)
+                const row = [
+                    compra.data,
+                    compra.produto,
+                    compra.gtin,
+                    precoFormatado,
+                    compra.local
+                ].join(";");
+                csvContent += row + "\n";
+            });
+
+            // Cria um link de download
+            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'compras_mensais_export_' + new Date().toISOString().slice(0, 10) + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            alert("Dados exportados com sucesso! Verifique sua pasta de downloads.");
+        };
+
+        exportButton.addEventListener('click', exportarCSV);
+
+        // ------------------ Funções do Leitor de Código de Barras (MANTIDO) ------------------
+        
+        // ... (o restante do código do scanner é o mesmo e foi omitido aqui por brevidade, mas está no código completo fornecido) ...
+        
+        // Função de sucesso do scan
+        const onScanSuccess = (decodedText, decodedResult) => {
+            html5QrcodeScanner.stop().then(() => {
+                barcodeModal.style.display = "none";
+                
+                gtinInput.value = decodedText;
+                document.getElementById('scanResult').textContent = `Código escaneado: ${decodedText}`;
+
+                // Simulação da busca de produto
+                const produtoSimulado = mockCatalog[decodedText];
+                if (produtoSimulado) {
+                    produtoInput.value = produtoSimulado.nome;
+                    precoInput.value = produtoSimulado.preco;
+                    localInput.value = produtoSimulado.local;
+                } else {
+                    produtoInput.value = `Produto Desconhecido (GTIN: ${decodedText})`;
+                    precoInput.value = '';
+                    localInput.value = '';
+                }
+
+                alert(`Código de Barras Escaneado: ${decodedText}. Preencha os detalhes e adicione a compra.`);
+
+            }).catch(err => {
+                console.error("Erro ao parar o scanner:", err);
+            });
+        };
+
+        // Função para iniciar o scanner
+        const startScanner = () => {
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: { width: 250, height: 250 } }, 
+                onScanSuccess, 
+                (errorMessage) => { 
+                    // Log de erro silencioso
+                    // console.log(`Erro de scanner: ${errorMessage}`);
+                }
+            ).catch(err => {
+                document.getElementById('scanResult').textContent = `Erro ao iniciar a câmera: ${err}. Certifique-se de que o dispositivo tem câmera e deu permissão.`;
+            });
+        };
+
+        // Eventos do Modal
+        scanButton.onclick = function() {
+            barcodeModal.style.display = "block";
+            document.getElementById('scanResult').textContent = 'Aponte a câmera para o código de barras...';
+            startScanner();
+        }
+
+        closeSpan.onclick = function() {
+            barcodeModal.style.display = "none";
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(err => console.error("Erro ao parar o scanner no fechamento:", err));
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == barcodeModal) {
+                barcodeModal.style.display = "none";
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.stop().catch(err => console.error("Erro ao parar o scanner no clique externo:", err));
+                }
+            }
+        }
+        
+        // ------------------ Inicialização ------------------
+        dataCompraInput.valueAsDate = new Date();
+        aplicarFiltro(); // Carrega os dados na inicialização (sem filtro, por padrão)
+    });
+</script>
+
+</body>
+</html>
