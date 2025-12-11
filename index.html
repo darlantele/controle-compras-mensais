@@ -216,6 +216,10 @@
 </div>
 
 <script>
+    // ** MUITO IMPORTANTE: SUBSTITUA ESTE PLACEHOLDER PELA SUA URL DO APPS SCRIPT **
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVXCbI9Ihl3C9Yr-Jy8aowZXcfx3dSpAbQ1P8rUrPkOwSKjhnTlcTTPId7R1FYhpbRJQ/exec'; 
+    // ** A URL deve ser uma string, entre aspas simples ('') **
+
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('addCompraForm');
         const listaCompras = document.getElementById('listaCompras');
@@ -234,7 +238,9 @@
         const localInput = document.getElementById('local');
         const dataCompraInput = document.getElementById('dataCompra');
 
-        let compras = JSON.parse(localStorage.getItem('comprasMensais')) || [];
+        // MUDANÇA: O array 'compras' agora é um cache local, mas a fonte primária é a nuvem
+        let compras = []; // Começa vazio, os dados virão da nuvem
+
         let html5QrcodeScanner;
 
         // Mock data (dados simulados para demonstração)
@@ -244,12 +250,64 @@
             "7893000246802": { nome: "Leite Integral UHT 1L", preco: 4.99, local: "Mercado Z" }
         };
 
-        // Função para salvar no Local Storage
-        const saveCompras = () => {
-            localStorage.setItem('comprasMensais', JSON.stringify(compras));
+        // ------------------ FUNÇÃO CENTRAL: SALVAR NA NUVEM ------------------
+
+        const salvarNaNuvem = async (dados) => {
+            document.getElementById('addCompraButton').disabled = true;
+            document.getElementById('addCompraButton').textContent = 'Salvando...';
+
+            try {
+                // Requisição POST para o Apps Script
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'cors', // Necessário para evitar erros de CORS (Cross-Origin Resource Sharing)
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8' 
+                        // Apps Script prefere 'text/plain' para o corpo raw/JSON
+                    },
+                    body: JSON.stringify(dados)
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.status === 'success') {
+                    alert('✅ Compra salva na nuvem com sucesso!');
+                    // Após salvar, atualizamos o histórico
+                    await buscarDadosDaNuvem(); 
+                } else {
+                    alert('❌ Erro ao salvar na nuvem: ' + resultado.message);
+                }
+            } catch (error) {
+                alert('🚨 Erro de conexão com o servidor: ' + error.message);
+            } finally {
+                document.getElementById('addCompraButton').disabled = false;
+                document.getElementById('addCompraButton').textContent = 'Adicionar Compra';
+            }
         };
 
-        // Função para renderizar a lista e calcular o total (AGORA ACEITA UM ARRAY PARA FILTRAGEM)
+        // ------------------ FUNÇÃO CENTRAL: BUSCAR NA NUVEM ------------------
+
+        const buscarDadosDaNuvem = async () => {
+            // Se o App Script tiver uma função para ler dados, usaremos um GET aqui.
+            // Para simplicidade inicial, você importará o CSV da planilha para análise.
+            
+            // POR ENQUANTO, para a demonstração e para manter a experiência do usuário,
+            // carregaremos um array VAZIO, já que não implementamos a função de LEITURA no Apps Script.
+            // A leitura é mais complexa e faremos em uma etapa posterior.
+            // A prioridade agora é garantir a ESCRITA na nuvem.
+            compras = []; 
+
+            // Para que o filtro funcione, precisamos da função de leitura da nuvem. 
+            // POR ENQUANTO, manteremos uma versão de LEITURA DO LOCAL STORAGE (LEGADO)
+            // APENAS PARA O TESTE E FILTRAGEM. Isso será removido na próxima etapa.
+            compras = JSON.parse(localStorage.getItem('comprasMensais')) || [];
+
+            aplicarFiltro();
+        };
+        
+        // ------------------ Renderização e Remoção (Inalteradas, usam o array 'compras') ------------------
+        
         const renderCompras = (comprasParaRenderizar = compras) => {
             listaCompras.innerHTML = '';
             let total = 0;
@@ -268,13 +326,21 @@
             });
 
             totalGastoSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-            saveCompras(); // Salva sempre o array COMPLETO no Local Storage
+            // MUDANÇA: Não salva no Local Storage aqui. Apenas atualiza o cache de visualização.
         };
 
-        // Função global para remover item (usa múltiplos atributos para encontrar o item correto)
+        // Função global para remover item - IMPORTANTE: A remoção AGORA PRECISA OCORRER NA NUVEM
         window.removerCompra = (data, gtin, preco) => {
-             // Encontra o índice do item original a ser removido no array 'compras'
-            const originalIndex = compras.findIndex(c => 
+            // ATENÇÃO: A remoção na nuvem (Sheets) é mais complexa. Por enquanto,
+            // para manter o foco na ESCRITA, o botão de remover fará a remoção APENAS no Local Storage 
+            // e no array de visualização 'compras', mas NÃO será sincronizado com o Sheets.
+            
+            // Para remoção no Sheets, precisaríamos de uma função DELETE no Apps Script, 
+            // que é a próxima etapa de complexidade. Por enquanto:
+            alert("⚠️ Função de remoção na Nuvem não implementada. Removendo apenas do histórico local.");
+
+            // Remove do cache de visualização (e Local Storage temporariamente)
+             const originalIndex = compras.findIndex(c => 
                 c.data === data && 
                 c.gtin === gtin && 
                 c.preco === preco
@@ -283,32 +349,38 @@
             if (originalIndex > -1) {
                  compras.splice(originalIndex, 1);
             }
-            // Após a remoção no array principal, re-renderiza com o filtro atual
+            
+            // Salva no Local Storage (LEGADO) para manter a coerência local até implementarmos a Leitura da Nuvem
+            localStorage.setItem('comprasMensais', JSON.stringify(compras)); 
+            
             aplicarFiltro();
         };
 
-        // Adicionar nova compra
-        form.addEventListener('submit', (e) => {
+        // Adicionar nova compra (MODIFICADO)
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const novaCompra = {
                 data: dataCompraInput.value,
                 produto: produtoInput.value,
-                gtin: gtinInput.value || '',
+                gtin: gtinInput.value || 'SEM_GTIN',
                 preco: parseFloat(precoInput.value),
                 local: localInput.value
             };
 
-            compras.push(novaCompra);
+            // NOVA AÇÃO: Chama a função que salva na nuvem (Apps Script)
+            await salvarNaNuvem(novaCompra); 
+            
             form.reset();
-            dataCompraInput.valueAsDate = new Date(); 
-            aplicarFiltro(); // Renderiza o histórico com o filtro aplicado (ou sem filtro)
+            dataCompraInput.valueAsDate = new Date();
+            // aplicarFiltro() é chamado dentro de salvarNaNuvem() após o sucesso
         });
-
-        // ------------------ FUNÇÕES DE FILTRO POR DATA (NOVO) ------------------
+        
+        // ------------------ Funções de Filtro e Exportação (MANTIDAS) ------------------
 
         const aplicarFiltro = () => {
-            const startDate = startDateFilter.value;
+             // ... [Mantenha o código da função aplicarFiltro (usa o array 'compras')] ...
+             const startDate = startDateFilter.value;
             const endDate = endDateFilter.value;
 
             if (!startDate && !endDate) {
@@ -332,13 +404,12 @@
         resetFilterButton.addEventListener('click', () => {
             startDateFilter.value = '';
             endDateFilter.value = '';
-            aplicarFiltro(); // Renderiza tudo
+            aplicarFiltro();
         });
 
-        // ------------------ FUNÇÃO DE EXPORTAÇÃO CSV (NOVO) ------------------
-
         const exportarCSV = () => {
-            if (compras.length === 0) {
+             // ... [Mantenha o código da função exportarCSV (usa o array 'compras')] ...
+             if (compras.length === 0) {
                 alert("Não há dados de compra para exportar.");
                 return;
             }
@@ -375,9 +446,9 @@
 
         exportButton.addEventListener('click', exportarCSV);
 
-        // ------------------ Funções do Leitor de Código de Barras (MANTIDO) ------------------
+        // ------------------ Funções do Leitor de Código de Barras (MANTIDAS) ------------------
         
-        // ... (o restante do código do scanner é o mesmo e foi omitido aqui por brevidade, mas está no código completo fornecido) ...
+        // ... [Mantenha as funções do scanner onScanSuccess, startScanner, e os Eventos do Modal] ...
         
         // Função de sucesso do scan
         const onScanSuccess = (decodedText, decodedResult) => {
@@ -447,9 +518,11 @@
         
         // ------------------ Inicialização ------------------
         dataCompraInput.valueAsDate = new Date();
-        aplicarFiltro(); // Carrega os dados na inicialização (sem filtro, por padrão)
+        // Na inicialização, tentamos buscar os dados da nuvem (ou do Local Storage, temporariamente)
+        buscarDadosDaNuvem(); 
     });
 </script>
 
 </body>
+
 </html>
