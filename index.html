@@ -215,11 +215,10 @@
 </div>
 
 <script>
-    // ** MUITO IMPORTANTE: SUBSTITUA ESTE PLACEHOLDER PELA SUA URL DO APPS SCRIPT **
+    // ** MUITO IMPORTANTE: MANTENHA SUA URL DO APPS SCRIPT AQUI **
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVXCbI9Ihl3C9Yr-Jy8aowZXcfx3dSpAbQ1P8rUrPkOwSKjhnTlcTTPId7R1FYhpbRJQ/exec'; 
     // ** A URL deve ser uma string, entre aspas simples ('') **
 
-    // Lista de locais predefinidos (NOVO: Adicione os locais que você mais frequenta aqui!)
     const LOCAIS_DE_COMPRA = [
         "Supermercado A", 
         "Atacado Y", 
@@ -241,17 +240,14 @@
         const barcodeModal = document.getElementById('barcodeModal');
         const closeSpan = document.querySelector('.close');
         
-        // Elementos do Formulário
         const produtoInput = document.getElementById('produto');
         const gtinInput = document.getElementById('gtin');
         const precoInput = document.getElementById('preco');
-        const localSelect = document.getElementById('localSelect'); // NOVO: Campo select
+        const localSelect = document.getElementById('localSelect');
         const dataCompraInput = document.getElementById('dataCompra');
-
-        // Botão de Limpar (NOVO)
         const limparButton = document.getElementById('limparButton'); 
 
-        // Adiciona as opções de local ao campo SELECT (NOVO)
+        // Adiciona as opções de local ao campo SELECT
         LOCAIS_DE_COMPRA.forEach(local => {
             const option = document.createElement('option');
             option.value = local;
@@ -259,26 +255,53 @@
             localSelect.appendChild(option);
         });
 
-        let compras = JSON.parse(localStorage.getItem('comprasMensais')) || []; 
+        // MUDANÇA: 'compras' é o array de dados da nuvem
+        let compras = []; 
         let html5QrcodeScanner;
 
-        // Mock data (dados simulados para demonstração)
         const mockCatalog = {
             "7891000123456": { nome: "Biscoito Recheado Choco. Marca X 130g", preco: 3.50, local: "Supermercado A" },
             "7892000678901": { nome: "Arroz Agulhinha Tipo 1, 5kg", preco: 25.90, local: "Atacado Y" },
             "7893000246802": { nome: "Leite Integral UHT 1L", preco: 4.99, local: "Mercado Z" }
         };
 
-        // ------------------ FUNÇÃO DE LIMPEZA (NOVO) ------------------
         const limparFormulario = () => {
             form.reset();
             dataCompraInput.valueAsDate = new Date();
-            // Garante que o select volte para a primeira opção ou vazio, dependendo do seu HTML
         };
         limparButton.addEventListener('click', limparFormulario);
 
 
-        // ------------------ FUNÇÃO CENTRAL: SALVAR NA NUVEM ------------------
+        // ------------------ FUNÇÃO CENTRAL: BUSCAR NA NUVEM (MODIFICADA) ------------------
+
+        const buscarDadosDaNuvem = async () => {
+            try {
+                // Requisição GET para buscar dados
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.status === 'success') {
+                    // Armazena os dados vindos da planilha no array 'compras'
+                    compras = resultado.data; 
+                    aplicarFiltro();
+                    // Limpa o Local Storage, pois não é mais a fonte primária
+                    localStorage.removeItem('comprasMensais'); 
+                } else {
+                    console.error('Erro ao buscar dados:', resultado.message);
+                    alert('⚠️ Não foi possível carregar o histórico de compras da nuvem.');
+                }
+            } catch (error) {
+                console.error('Erro de conexão:', error);
+                alert('🚨 Falha na comunicação com o Google Sheets API. Verifique a conexão.');
+            }
+        };
+
+
+        // ------------------ FUNÇÃO CENTRAL: SALVAR NA NUVEM (Inalterada) ------------------
 
         const salvarNaNuvem = async (dados) => {
             document.getElementById('addCompraButton').disabled = true;
@@ -287,7 +310,7 @@
             try {
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    mode: 'cors', 
+                    mode: 'cors',
                     cache: 'no-cache',
                     headers: {
                         'Content-Type': 'text/plain;charset=utf-8'
@@ -299,11 +322,9 @@
 
                 if (resultado.status === 'success') {
                     alert('✅ Compra salva na nuvem com sucesso!');
-                    limparFormulario(); // Limpa após o sucesso
-                    // Para fins de visualização local (temporário), salvamos no Local Storage:
-                    compras.push(dados);
-                    localStorage.setItem('comprasMensais', JSON.stringify(compras));
-                    aplicarFiltro();
+                    limparFormulario();
+                    // Após salvar, busca todos os dados novamente para atualizar o histórico
+                    await buscarDadosDaNuvem(); 
                 } else {
                     alert('❌ Erro ao salvar na nuvem: ' + resultado.message);
                 }
@@ -315,22 +336,23 @@
             }
         };
 
-        // ... (As funções de renderização, remoção, busca na nuvem, filtro e exportação permanecem as mesmas) ...
+
+        // ------------------ Renderização, Filtro e Exportação (MODIFICADAS/ADAPTADAS) ------------------
         
-        // Função para renderizar a lista e calcular o total
         const renderCompras = (comprasParaRenderizar = compras) => {
             listaCompras.innerHTML = '';
             let total = 0;
             
-            // Ordena por data decrescente (mais recente primeiro)
+            // ATENÇÃO: Os dados do Sheets chegam como strings. O 'preco' precisa ser convertido.
             comprasParaRenderizar.sort((a, b) => new Date(b.data) - new Date(a.data));
 
-            comprasParaRenderizar.forEach((compra, index) => {
-                total += parseFloat(compra.preco);
+            comprasParaRenderizar.forEach((compra) => {
+                const precoFloat = parseFloat(compra.preco); // CONVERSÃO
+                total += precoFloat;
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    **${compra.produto}** (${compra.gtin || 'Sem GTIN'}) | R$ ${compra.preco.toFixed(2)} | ${compra.local} | ${compra.data}
-                    <button onclick="removerCompra('${compra.data}', '${compra.gtin}', ${compra.preco})">Remover</button>
+                    **${compra.produto}** (${compra.gtin || 'Sem GTIN'}) | R$ ${precoFloat.toFixed(2)} | ${compra.local} | ${compra.data}
+                    <button onclick="removerCompra('${compra.data}', '${compra.gtin}', ${precoFloat})">Remover</button>
                 `;
                 listaCompras.appendChild(li);
             });
@@ -339,79 +361,13 @@
         };
         
         window.removerCompra = (data, gtin, preco) => {
-            alert("⚠️ Função de remoção na Nuvem não implementada. Removendo apenas do histórico local.");
-
-            // Remove do cache de visualização (e Local Storage temporariamente)
-             const originalIndex = compras.findIndex(c => 
-                c.data === data && 
-                c.gtin === gtin && 
-                c.preco === preco
-            );
-
-            if (originalIndex > -1) {
-                 compras.splice(originalIndex, 1);
-            }
-            
-            // Salva no Local Storage (LEGADO) para manter a coerência local
-            localStorage.setItem('comprasMensais', JSON.stringify(compras)); 
-            
-            aplicarFiltro();
+            // AVISO ATUALIZADO: Remoção na nuvem é complexa, faremos depois.
+            alert("⚠️ A remoção de dados da planilha Google (nuvem) é um processo complexo com o Apps Script e não foi implementada ainda. Este registro só será removido na próxima atualização de código.");
+            // Não remove nada, apenas avisa.
         };
-
-        const buscarDadosDaNuvem = async () => {
-             // Por enquanto, para visualização local, carregamos o Local Storage
-            compras = JSON.parse(localStorage.getItem('comprasMensais')) || [];
-            aplicarFiltro();
-        };
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const novaCompra = {
-                data: dataCompraInput.value,
-                produto: produtoInput.value,
-                gtin: gtinInput.value || 'SEM_GTIN',
-                preco: parseFloat(precoInput.value),
-                local: localSelect.value // NOVO: Pega o valor do Select
-            };
-
-            await salvarNaNuvem(novaCompra); 
-        });
-
-
-        // ------------------ Funções do Leitor de Código de Barras (MODIFICADO) ------------------
-        
-        // Função de sucesso do scan
-        const onScanSuccess = (decodedText, decodedResult) => {
-            html5QrcodeScanner.stop().then(() => {
-                barcodeModal.style.display = "none";
-                
-                gtinInput.value = decodedText;
-                document.getElementById('scanResult').textContent = `Código escaneado: ${decodedText}`;
-
-                // Simulação da busca de produto
-                const produtoSimulado = mockCatalog[decodedText];
-                if (produtoSimulado) {
-                    produtoInput.value = produtoSimulado.nome;
-                    precoInput.value = produtoSimulado.preco;
-                    localSelect.value = produtoSimulado.local;
-                } else {
-                    // MUDANÇA: Se desconhecido, o campo PRODUTO fica VAZIO para facilitar a digitação
-                    produtoInput.value = ''; 
-                    precoInput.value = '';
-                    localSelect.value = LOCAIS_DE_COMPRA[0]; // Volta para o primeiro local da lista
-                }
-
-                alert(`Código de Barras Escaneado: ${decodedText}. Preencha os detalhes e adicione a compra.`);
-
-            }).catch(err => {
-                console.error("Erro ao parar o scanner:", err);
-            });
-        };
-        
-        // ... (O restante das funções do scanner, filtro, exportação, etc. permanece inalterado) ...
 
         const aplicarFiltro = () => {
+             // ... [Mantenha o código da função aplicarFiltro] ...
             const startDate = startDateFilter.value;
             const endDate = endDateFilter.value;
 
@@ -424,7 +380,8 @@
             const dataFinal = endDate ? new Date(endDate + 'T23:59:59') : new Date('2900-01-01T23:59:59');
 
             const comprasFiltradas = compras.filter(compra => {
-                const dataCompra = new Date(compra.data + 'T00:00:00');
+                // A data pode vir do Sheets como objeto Date do JS, ou string. Convertemos para segurança:
+                const dataCompra = new Date(compra.data.toString().slice(0, 10) + 'T00:00:00');
                 return dataCompra >= dataInicial && dataCompra <= dataFinal;
             });
 
@@ -440,18 +397,20 @@
         });
 
         const exportarCSV = () => {
+             // ... [Mantenha o código da função exportarCSV] ...
              if (compras.length === 0) {
                 alert("Não há dados de compra para exportar.");
                 return;
             }
 
+            // Os headers precisam corresponder aos campos (data, produto, gtin, preco, local)
             const headers = ["Data", "Produto", "GTIN", "Preco", "Local"];
             let csvContent = headers.join(";") + "\n";
 
             compras.forEach(compra => {
-                const precoFormatado = compra.preco.toFixed(2).replace('.', ','); 
+                const precoFormatado = parseFloat(compra.preco).toFixed(2).replace('.', ','); 
                 const row = [
-                    compra.data,
+                    compra.data.toString().slice(0, 10), // Limpa a data para o formato yyyy-mm-dd
                     compra.produto,
                     compra.gtin,
                     precoFormatado,
@@ -474,6 +433,36 @@
 
         exportButton.addEventListener('click', exportarCSV);
 
+        // ------------------ Funções do Leitor de Código de Barras (MANTIDAS) ------------------
+        
+        // ... (as funções do scanner onScanSuccess, startScanner, e os Eventos do Modal permanecem os mesmos) ...
+
+        const onScanSuccess = (decodedText, decodedResult) => {
+            html5QrcodeScanner.stop().then(() => {
+                barcodeModal.style.display = "none";
+                
+                gtinInput.value = decodedText;
+                document.getElementById('scanResult').textContent = `Código escaneado: ${decodedText}`;
+
+                // Simulação da busca de produto
+                const produtoSimulado = mockCatalog[decodedText];
+                if (produtoSimulado) {
+                    produtoInput.value = produtoSimulado.nome;
+                    precoInput.value = produtoSimulado.preco;
+                    localSelect.value = produtoSimulado.local;
+                } else {
+                    produtoInput.value = ''; 
+                    precoInput.value = '';
+                    localSelect.value = LOCAIS_DE_COMPRA[0]; 
+                }
+
+                alert(`Código de Barras Escaneado: ${decodedText}. Preencha os detalhes e adicione a compra.`);
+
+            }).catch(err => {
+                console.error("Erro ao parar o scanner:", err);
+            });
+        };
+        
         const startScanner = () => {
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start(
@@ -488,7 +477,6 @@
             });
         };
 
-        // Eventos do Modal
         scanButton.onclick = function() {
             barcodeModal.style.display = "block";
             document.getElementById('scanResult').textContent = 'Aponte a câmera para o código de barras...';
@@ -513,6 +501,7 @@
         
         // ------------------ Inicialização ------------------
         dataCompraInput.valueAsDate = new Date();
+        // Chama a função de busca na nuvem para carregar o histórico
         buscarDadosDaNuvem(); 
     });
 </script>
@@ -520,4 +509,5 @@
 </body>
 
 </html>
+
 
