@@ -301,40 +301,38 @@
         };
 
 
-        // ------------------ FUNÇÃO CENTRAL: SALVAR NA NUVEM (Inalterada) ------------------
+        // ------------------ FUNÇÃO CENTRAL: SALVAR NA NUVEM (TUNELAMENTO GET) ------------------
 
-        const salvarNaNuvem = async (dados) => {
-            document.getElementById('addCompraButton').disabled = true;
-            document.getElementById('addCompraButton').textContent = 'Salvando...';
+const salvarNaNuvem = async (dados) => {
+    document.getElementById('addCompraButton').disabled = true;
+    document.getElementById('addCompraButton').textContent = 'Salvando...';
 
-            try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8'
-                    },
-                    body: JSON.stringify(dados)
-                });
+    try {
+        // Envia os dados como parâmetros de URL, forçando o uso do método GET (que funciona)
+        const urlComDados = `${WEB_APP_URL}?action=write&data=${encodeURIComponent(JSON.stringify(dados))}`;
 
-                const resultado = await response.json();
+        const response = await fetch(urlComDados, {
+            method: 'GET', // USAMOS GET AQUI PARA EVITAR O ERRO DE POST BLOQUEADO
+            mode: 'cors'
+        });
 
-                if (resultado.status === 'success') {
-                    alert('✅ Compra salva na nuvem com sucesso!');
-                    limparFormulario();
-                    // Após salvar, busca todos os dados novamente para atualizar o histórico
-                    await buscarDadosDaNuvem(); 
-                } else {
-                    alert('❌ Erro ao salvar na nuvem: ' + resultado.message);
-                }
-            } catch (error) {
-                alert('🚨 Erro de conexão com o servidor: ' + error.message);
-            } finally {
-                document.getElementById('addCompraButton').disabled = false;
-                document.getElementById('addCompraButton').textContent = 'Adicionar Compra';
-            }
-        };
+        const resultado = await response.json();
+
+        if (resultado.status === 'success') {
+            alert('✅ Compra salva na nuvem com sucesso!');
+            limparFormulario();
+            // Após salvar, busca todos os dados novamente para atualizar o histórico
+            await buscarDadosDaNuvem(); 
+        } else {
+            alert('❌ Erro ao salvar na nuvem: ' + resultado.message);
+        }
+    } catch (error) {
+        alert('🚨 Erro de conexão com o servidor: ' + error.message);
+    } finally {
+        document.getElementById('addCompraButton').disabled = false;
+        document.getElementById('addCompraButton').textContent = 'Adicionar Compra';
+    }
+};
 
 
         // ------------------ Renderização, Filtro e Exportação (MODIFICADAS/ADAPTADAS) ------------------
@@ -509,6 +507,7 @@
 </body>
 
 </html>
+
 
 
 
