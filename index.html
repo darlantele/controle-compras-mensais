@@ -6,143 +6,25 @@
     <title>Controle de Compras Mensais</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        h1 {
-            color: #0056b3;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 10px;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="number"], input[type="date"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-            margin-top: 5px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        #scanButton {
-            background-color: #007bff;
-        }
-        #scanButton:hover {
-            background-color: #0056b3;
-        }
-        #exportButton {
-            background-color: #6c757d;
-        }
-        #exportButton:hover {
-            background-color: #5a6268;
-        }
-        #filterSection {
-            background-color: #e0f7fa;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        #filterSection input {
-            width: auto;
-            margin-right: 10px;
-        }
-        .filter-controls {
-            display: flex;
-            align-items: flex-end;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        #historico {
-            margin-top: 30px;
-        }
-        #listaCompras {
-            list-style: none;
-            padding: 0;
-        }
-        #listaCompras li {
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9em;
-        }
-        .total {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 1px solid #ccc;
-            color: #dc3545;
-        }
-        /* Modal para o Leitor de Código de Barras */
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.4); 
-            padding-top: 60px;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; 
-            border-radius: 8px;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        #reader {
-            width: 100%;
-            height: 300px;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        h1 { color: #0056b3; border-bottom: 2px solid #ccc; padding-bottom: 10px; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"], input[type="date"] { width: calc(100% - 22px); padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; margin-top: 5px; }
+        button:hover { background-color: #218838; }
+        #scanButton { background-color: #007bff; }
+        #exportButton { background-color: #6c757d; }
+        #filterSection { background-color: #e0f7fa; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .filter-controls { display: flex; align-items: flex-end; gap: 10px; margin-top: 10px; }
+        #listaCompras { list-style: none; padding: 0; }
+        #listaCompras li { background: #e9ecef; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; }
+        .total { font-size: 1.2em; font-weight: bold; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ccc; color: #dc3545; }
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); padding-top: 60px; }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; border-radius: 8px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        #reader { width: 100%; height: 300px; }
     </style>
 </head>
 <body>
@@ -171,12 +53,12 @@
     <h2>Adicionar Nova Compra</h2>
     <form id="addCompraForm">
         <div class="form-group">
-            <label for="produto">Produto (ou GTIN do escaneamento):</label>
+            <label for="produto">Produto:</label>
             <input type="text" id="produto" required>
         </div>
         <div class="form-group">
             <label for="gtin">Código de Barras (GTIN):</label>
-            <input type="text" id="gtin" placeholder="Será preenchido pelo escaneamento ou digitado">
+            <input type="text" id="gtin" placeholder="Será preenchido pelo escaneamento">
         </div>
         <div class="form-group">
             <label for="preco">Preço (R$):</label>
@@ -184,70 +66,50 @@
         </div>
         <div class="form-group">
             <label for="localSelect">Local da Compra:</label>
-            <select id="localSelect"></select> </div>
+            <select id="localSelect" style="width: 100%; padding: 10px;"></select>
+        </div>
         <div class="form-group">
             <label for="dataCompra">Data:</label>
             <input type="date" id="dataCompra" required>
         </div>
         
         <button type="submit" id="addCompraButton">Adicionar Compra</button>
-        <button type="button" id="scanButton">Escanear Código de Barras</button>
-        <button type="button" id="limparButton" style="background-color: #dc3545;">Limpar Formulário</button> <button type="button" id="exportButton">Exportar CSV</button>
+        <button type="button" id="scanButton">Escanear Código</button>
+        <button type="button" id="limparButton" style="background-color: #dc3545;">Limpar</button> 
+        <button type="button" id="exportButton">Exportar CSV</button>
     </form>
     
     <hr>
 
     <div id="historico">
         <h2>Histórico de Compras</h2>
-        <p class="total">Total Gasto no Período: <span id="totalGasto">R$ 0,00</span></p>
-        <ul id="listaCompras">
-            </ul>
+        <p class="total">Total Gasto: <span id="totalGasto">R$ 0,00</span></p>
+        <ul id="listaCompras"></ul>
     </div>
 </div>
 
 <div id="barcodeModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>Escaneamento de Código de Barras</h2>
+        <h2>Escaneamento</h2>
         <div id="reader"></div>
         <p id="scanResult"></p>
     </div>
 </div>
 
 <script>
-    // ** MUITO IMPORTANTE: MANTENHA SUA URL DO APPS SCRIPT AQUI **
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVXCbI9Ihl3C9Yr-Jy8aowZXcfx3dSpAbQ1P8rUrPkOwSKjhnTlcTTPId7R1FYhpbRJQ/exec'; 
-    // ** A URL deve ser uma string, entre aspas simples ('') **
 
-    const LOCAIS_DE_COMPRA = [
-        "Supermercado A", 
-        "Atacado Y", 
-        "Mercado Z", 
-        "Padaria Central", 
-        "Farmácia Líder"
-    ];
+    const LOCAIS_DE_COMPRA = ["Supermercado A", "Atacado Y", "Mercado Z", "Padaria Central", "Farmácia Líder"];
+    let compras = []; 
+    let html5QrcodeScanner;
 
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('addCompraForm');
-        const listaCompras = document.getElementById('listaCompras');
-        const totalGastoSpan = document.getElementById('totalGasto');
-        const scanButton = document.getElementById('scanButton');
-        const exportButton = document.getElementById('exportButton');
-        const filterButton = document.getElementById('filterButton');
-        const resetFilterButton = document.getElementById('resetFilterButton');
-        const startDateFilter = document.getElementById('startDateFilter');
-        const endDateFilter = document.getElementById('endDateFilter');
-        const barcodeModal = document.getElementById('barcodeModal');
-        const closeSpan = document.querySelector('.close');
-        
-        const produtoInput = document.getElementById('produto');
-        const gtinInput = document.getElementById('gtin');
-        const precoInput = document.getElementById('preco');
         const localSelect = document.getElementById('localSelect');
         const dataCompraInput = document.getElementById('dataCompra');
-        const limparButton = document.getElementById('limparButton'); 
-
-        // Adiciona as opções de local ao campo SELECT
+        
+        // Preencher locais
         LOCAIS_DE_COMPRA.forEach(local => {
             const option = document.createElement('option');
             option.value = local;
@@ -255,275 +117,123 @@
             localSelect.appendChild(option);
         });
 
-        // MUDANÇA: 'compras' é o array de dados da nuvem
-        let compras = []; 
-        let html5QrcodeScanner;
+        // Configurar data padrão
+        dataCompraInput.valueAsDate = new Date();
 
-        const mockCatalog = {
-            "7891000123456": { nome: "Biscoito Recheado Choco. Marca X 130g", preco: 3.50, local: "Supermercado A" },
-            "7892000678901": { nome: "Arroz Agulhinha Tipo 1, 5kg", preco: 25.90, local: "Atacado Y" },
-            "7893000246802": { nome: "Leite Integral UHT 1L", preco: 4.99, local: "Mercado Z" }
-        };
-
-        const limparFormulario = () => {
-            form.reset();
-            dataCompraInput.valueAsDate = new Date();
-        };
-        limparButton.addEventListener('click', limparFormulario);
-
-
-        // ------------------ FUNÇÃO CENTRAL: BUSCAR NA NUVEM (MODIFICADA) ------------------
-
+        // ------------------ FUNÇÃO: BUSCAR DADOS ------------------
         const buscarDadosDaNuvem = async () => {
             try {
-                // Requisição GET para buscar dados
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
+                const response = await fetch(WEB_APP_URL);
+                const resultado = await response.json();
+                if (resultado.status === 'success') {
+                    compras = resultado.data;
+                    renderCompras();
+                }
+            } catch (error) {
+                console.error('Erro ao buscar:', error);
+            }
+        };
 
+        // ------------------ FUNÇÃO: SALVAR DADOS ------------------
+        const salvarNaNuvem = async (dados) => {
+            const btn = document.getElementById('addCompraButton');
+            btn.disabled = true;
+            btn.textContent = 'Salvando...';
+
+            try {
+                const urlComDados = `${WEB_APP_URL}?action=write&data=${encodeURIComponent(JSON.stringify(dados))}`;
+                const response = await fetch(urlComDados);
                 const resultado = await response.json();
 
                 if (resultado.status === 'success') {
-                    // Armazena os dados vindos da planilha no array 'compras'
-                    compras = resultado.data; 
-                    aplicarFiltro();
-                    // Limpa o Local Storage, pois não é mais a fonte primária
-                    localStorage.removeItem('comprasMensais'); 
+                    alert('✅ Compra salva na nuvem!');
+                    form.reset();
+                    dataCompraInput.valueAsDate = new Date();
+                    await buscarDadosDaNuvem(); 
                 } else {
-                    console.error('Erro ao buscar dados:', resultado.message);
-                    alert('⚠️ Não foi possível carregar o histórico de compras da nuvem.');
+                    alert('❌ Erro: ' + resultado.message);
                 }
             } catch (error) {
-                console.error('Erro de conexão:', error);
-                alert('🚨 Falha na comunicação com o Google Sheets API. Verifique a conexão.');
+                alert('🚨 Erro de conexão.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Adicionar Compra';
             }
         };
 
-
-        // ------------------ FUNÇÃO CENTRAL: SALVAR NA NUVEM (TUNELAMENTO GET) ------------------
-
-const salvarNaNuvem = async (dados) => {
-    document.getElementById('addCompraButton').disabled = true;
-    document.getElementById('addCompraButton').textContent = 'Salvando...';
-
-    try {
-        // Envia os dados como parâmetros de URL, forçando o uso do método GET (que funciona)
-        const urlComDados = `${WEB_APP_URL}?action=write&data=${encodeURIComponent(JSON.stringify(dados))}`;
-
-        const response = await fetch(urlComDados, {
-            method: 'GET', // USAMOS GET AQUI PARA EVITAR O ERRO DE POST BLOQUEADO
-            mode: 'cors'
-        });
-
-        const resultado = await response.json();
-
-        if (resultado.status === 'success') {
-            alert('✅ Compra salva na nuvem com sucesso!');
-            limparFormulario();
-            // Após salvar, busca todos os dados novamente para atualizar o histórico
-            await buscarDadosDaNuvem(); 
-        } else {
-            alert('❌ Erro ao salvar na nuvem: ' + resultado.message);
-        }
-    } catch (error) {
-        alert('🚨 Erro de conexão com o servidor: ' + error.message);
-    } finally {
-        document.getElementById('addCompraButton').disabled = false;
-        document.getElementById('addCompraButton').textContent = 'Adicionar Compra';
-    }
-};
-
-
-        // ------------------ Renderização, Filtro e Exportação (MODIFICADAS/ADAPTADAS) ------------------
-        
-        const renderCompras = (comprasParaRenderizar = compras) => {
-            listaCompras.innerHTML = '';
-            let total = 0;
-            
-            // ATENÇÃO: Os dados do Sheets chegam como strings. O 'preco' precisa ser convertido.
-            comprasParaRenderizar.sort((a, b) => new Date(b.data) - new Date(a.data));
-
-            comprasParaRenderizar.forEach((compra) => {
-                const precoFloat = parseFloat(compra.preco); // CONVERSÃO
-                total += precoFloat;
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    **${compra.produto}** (${compra.gtin || 'Sem GTIN'}) | R$ ${precoFloat.toFixed(2)} | ${compra.local} | ${compra.data}
-                    <button onclick="removerCompra('${compra.data}', '${compra.gtin}', ${precoFloat})">Remover</button>
-                `;
-                listaCompras.appendChild(li);
-            });
-
-            totalGastoSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        };
-        
-        window.removerCompra = (data, gtin, preco) => {
-            // AVISO ATUALIZADO: Remoção na nuvem é complexa, faremos depois.
-            alert("⚠️ A remoção de dados da planilha Google (nuvem) é um processo complexo com o Apps Script e não foi implementada ainda. Este registro só será removido na próxima atualização de código.");
-            // Não remove nada, apenas avisa.
-        };
-
-        const aplicarFiltro = () => {
-             // ... [Mantenha o código da função aplicarFiltro] ...
-            const startDate = startDateFilter.value;
-            const endDate = endDateFilter.value;
-
-            if (!startDate && !endDate) {
-                renderCompras(compras); 
-                return;
-            }
-
-            const dataInicial = startDate ? new Date(startDate + 'T00:00:00') : new Date('1900-01-01T00:00:00');
-            const dataFinal = endDate ? new Date(endDate + 'T23:59:59') : new Date('2900-01-01T23:59:59');
-
-            const comprasFiltradas = compras.filter(compra => {
-                // A data pode vir do Sheets como objeto Date do JS, ou string. Convertemos para segurança:
-                const dataCompra = new Date(compra.data.toString().slice(0, 10) + 'T00:00:00');
-                return dataCompra >= dataInicial && dataCompra <= dataFinal;
-            });
-
-            renderCompras(comprasFiltradas);
-        };
-
-        filterButton.addEventListener('click', aplicarFiltro);
-        
-        resetFilterButton.addEventListener('click', () => {
-            startDateFilter.value = '';
-            endDateFilter.value = '';
-            aplicarFiltro();
-        });
-
-        const exportarCSV = () => {
-             // ... [Mantenha o código da função exportarCSV] ...
-             if (compras.length === 0) {
-                alert("Não há dados de compra para exportar.");
-                return;
-            }
-
-            // Os headers precisam corresponder aos campos (data, produto, gtin, preco, local)
-            const headers = ["Data", "Produto", "GTIN", "Preco", "Local"];
-            let csvContent = headers.join(";") + "\n";
-
-            compras.forEach(compra => {
-                const precoFormatado = parseFloat(compra.preco).toFixed(2).replace('.', ','); 
-                const row = [
-                    compra.data.toString().slice(0, 10), // Limpa a data para o formato yyyy-mm-dd
-                    compra.produto,
-                    compra.gtin,
-                    precoFormatado,
-                    compra.local
-                ].join(";");
-                csvContent += row + "\n";
-            });
-
-            const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'compras_mensais_export_' + new Date().toISOString().slice(0, 10) + '.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            alert("Dados exportados com sucesso! Verifique sua pasta de downloads.");
-        };
-
-        exportButton.addEventListener('click', exportarCSV);
-
-        // ------------------ Funções do Leitor de Código de Barras (MANTIDAS) ------------------
-        
-        // ... (as funções do scanner onScanSuccess, startScanner, e os Eventos do Modal permanecem os mesmos) ...
-
-        const onScanSuccess = (decodedText, decodedResult) => {
-            html5QrcodeScanner.stop().then(() => {
-                barcodeModal.style.display = "none";
-                
-                gtinInput.value = decodedText;
-                document.getElementById('scanResult').textContent = `Código escaneado: ${decodedText}`;
-
-                // Simulação da busca de produto
-                const produtoSimulado = mockCatalog[decodedText];
-                if (produtoSimulado) {
-                    produtoInput.value = produtoSimulado.nome;
-                    precoInput.value = produtoSimulado.preco;
-                    localSelect.value = produtoSimulado.local;
-                } else {
-                    produtoInput.value = ''; 
-                    precoInput.value = '';
-                    localSelect.value = LOCAIS_DE_COMPRA[0]; 
-                }
-
-                alert(`Código de Barras Escaneado: ${decodedText}. Preencha os detalhes e adicione a compra.`);
-
-            }).catch(err => {
-                console.error("Erro ao parar o scanner:", err);
-            });
-        };
-        
-        const startScanner = () => {
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } }, 
-                onScanSuccess, 
-                (errorMessage) => { 
-                    // Log de erro silencioso
-                }
-            ).catch(err => {
-                document.getElementById('scanResult').textContent = `Erro ao iniciar a câmera: ${err}. Certifique-se de que o dispositivo tem câmera e deu permissão.`;
-            });
-        };
-
-        scanButton.onclick = function() {
-            barcodeModal.style.display = "block";
-            document.getElementById('scanResult').textContent = 'Aponte a câmera para o código de barras...';
-            startScanner();
-        }
-
-        closeSpan.onclick = function() {
-            barcodeModal.style.display = "none";
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().catch(err => console.error("Erro ao parar o scanner no fechamento:", err));
-            }
-        }
-
-        window.onclick = function(event) {
-            if (event.target == barcodeModal) {
-                barcodeModal.style.display = "none";
-                if (html5QrcodeScanner) {
-                    html5QrcodeScanner.stop().catch(err => console.error("Erro ao parar o scanner no clique externo:", err));
-                }
-            }
-        }
-
-       // ------------------ ESCUTA O CLIQUE NO BOTÃO ADICIONAR ------------------
-        form.addEventListener('submit', async (evento) => {
-            evento.preventDefault(); // Impede a página de recarregar
-
-            // CAPTURA OS DADOS DOS CAMPOS NO MOMENTO DO CLIQUE
+        // ------------------ EVENTO: SUBMIT DO FORMULÁRIO ------------------
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
             const dadosParaSalvar = {
-                data: dataCompraInput.value,
-                produto: produtoInput.value,
-                gtin: gtinInput.value || "Sem GTIN",
-                preco: precoInput.value,
-                local: localSelect.value
+                data: document.getElementById('dataCompra').value,
+                produto: document.getElementById('produto').value,
+                gtin: document.getElementById('gtin').value || "Sem GTIN",
+                preco: document.getElementById('preco').value,
+                local: document.getElementById('localSelect').value
             };
-
-            // CHAMA A FUNÇÃO DE SALVAR
             await salvarNaNuvem(dadosParaSalvar);
-        });                 
-        
-        // ------------------ Inicialização ------------------
-        dataCompraInput.valueAsDate = new Date();
-        // Chama a função de busca na nuvem para carregar o histórico
-        buscarDadosDaNuvem(); 
+        });
+
+        // ------------------ RENDERIZAÇÃO E FILTROS ------------------
+        const renderCompras = (comprasParaRenderizar = compras) => {
+            const lista = document.getElementById('listaCompras');
+            const totalSpan = document.getElementById('totalGasto');
+            lista.innerHTML = '';
+            let total = 0;
+
+            comprasParaRenderizar.sort((a, b) => new Date(b.data) - new Date(a.data));
+            comprasParaRenderizar.forEach(compra => {
+                const preco = parseFloat(compra.preco) || 0;
+                total += preco;
+                const li = document.createElement('li');
+                li.innerHTML = `<div><strong>${compra.produto}</strong><br><small>${compra.data} | ${compra.local}</small></div><div>R$ ${preco.toFixed(2)}</div>`;
+                lista.appendChild(li);
+            });
+            totalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        };
+
+        document.getElementById('filterButton').onclick = () => {
+            const start = document.getElementById('startDateFilter').value;
+            const end = document.getElementById('endDateFilter').value;
+            if (!start || !end) return;
+            const filtradas = compras.filter(c => c.data >= start && c.data <= end);
+            renderCompras(filtradas);
+        };
+
+        document.getElementById('resetFilterButton').onclick = () => {
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            renderCompras();
+        };
+
+        // ------------------ SCANNER ------------------
+        const scanButton = document.getElementById('scanButton');
+        const modal = document.getElementById('barcodeModal');
+        const close = document.querySelector('.close');
+
+        scanButton.onclick = () => {
+            modal.style.display = "block";
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+            (text) => {
+                document.getElementById('gtin').value = text;
+                html5QrcodeScanner.stop();
+                modal.style.display = "none";
+            }, () => {});
+        };
+
+        close.onclick = () => {
+            modal.style.display = "none";
+            if (html5QrcodeScanner) html5QrcodeScanner.stop();
+        };
+
+        // Iniciar App
+        buscarDadosDaNuvem();
     });
 </script>
-
 </body>
-
 </html>
+
 
 
 
