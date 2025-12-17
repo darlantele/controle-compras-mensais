@@ -496,6 +496,23 @@ const salvarNaNuvem = async (dados) => {
                 }
             }
         }
+
+       // ------------------ ESCUTA O CLIQUE NO BOTÃO ADICIONAR ------------------
+        form.addEventListener('submit', async (evento) => {
+            evento.preventDefault(); // Impede a página de recarregar
+
+            // CAPTURA OS DADOS DOS CAMPOS NO MOMENTO DO CLIQUE
+            const dadosParaSalvar = {
+                data: dataCompraInput.value,
+                produto: produtoInput.value,
+                gtin: gtinInput.value || "Sem GTIN",
+                preco: precoInput.value,
+                local: localSelect.value
+            };
+
+            // CHAMA A FUNÇÃO DE SALVAR
+            await salvarNaNuvem(dadosParaSalvar);
+        });                 
         
         // ------------------ Inicialização ------------------
         dataCompraInput.valueAsDate = new Date();
@@ -507,6 +524,7 @@ const salvarNaNuvem = async (dados) => {
 </body>
 
 </html>
+
 
 
 
