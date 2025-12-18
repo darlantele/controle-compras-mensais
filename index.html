@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Compras v4.2 - Precisão Total</title>
+    <title>Compras Inteligentes v5.0</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 15px; background-color: #f0f2f5; color: #333; }
         .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border-radius: 12px; }
-        h1 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 10px; text-align: center; font-size: 1.5em; }
+        h1 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 10px; text-align: center; font-size: 1.5em; margin-bottom: 10px; }
+        
+        /* Estilo do Aviso de Histórico */
+        #avisoHistorico { display: none; background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
         .form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
         .form-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; }
         label { font-weight: bold; font-size: 0.85em; margin-bottom: 5px; color: #555; }
@@ -25,9 +29,9 @@
         .total-valor { font-size: 1.3em; color: #d63031; }
         
         #listaCompras { list-style: none; padding: 0; }
-        .item-compra { background: #fff; border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .item-compra { background: #fff; border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .item-info b { color: #0056b3; display: block; }
-        .unit-badge { background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #444; margin-left: 5px; }
+        .unit-badge { background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #444; }
         
         .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
         .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 10px; position: relative; }
@@ -37,6 +41,8 @@
 
 <div class="container">
     <h1 id="form-title">Nova Compra</h1>
+
+    <div id="avisoHistorico"></div>
 
     <form id="addCompraForm">
         <input type="hidden" id="edit-timestamp">
@@ -72,7 +78,7 @@
             </div>
             <div class="form-group">
                 <label>GTIN / Código:</label>
-                <input type="text" id="gtin" placeholder="Opcional">
+                <input type="text" id="gtin" placeholder="Escanear ou digitar">
             </div>
         </div>
 
@@ -105,7 +111,7 @@
 <div id="barcodeModal" class="modal">
     <div class="modal-content">
         <span onclick="fecharScanner()" style="position:absolute; right:15px; top:10px; font-size:25px; cursor:pointer;">&times;</span>
-        <h2>Scanner de Barras</h2>
+        <h2>Escanear Código</h2>
         <div id="reader"></div>
     </div>
 </div>
@@ -121,8 +127,48 @@
         const mainBtn = document.getElementById('mainButton');
         const title = document.getElementById('form-title');
         const dataInput = document.getElementById('dataCompra');
+        const aviso = document.getElementById('avisoHistorico');
+        const gtinInput = document.getElementById('gtin');
 
         dataInput.valueAsDate = new Date();
+
+        // --- FUNÇÃO: BUSCAR HISTÓRICO POR GTIN ---
+        const verificarHistorico = async (gtin) => {
+            if (!gtin || gtin === "S/G" || gtin.length < 8) {
+                aviso.style.display = 'none';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${WEB_APP_URL}?action=buscarGTIN&gtin=${gtin}`);
+                const json = await res.json();
+
+                if (json.found) {
+                    const h = json.data;
+                    
+                    // Preenche os campos automaticamente
+                    document.getElementById('produto').value = h.produto;
+                    document.getElementById('qtd').value = h.qtd;
+                    document.getElementById('unidade').value = h.unidade;
+                    
+                    // Calcula a diferença de dias
+                    const dataPassada = new Date(h.data);
+                    const hoje = new Date();
+                    const diffDias = Math.floor((hoje - dataPassada) / (1000 * 60 * 60 * 24));
+                    
+                    // Exibe o aviso inteligente
+                    aviso.style.display = 'block';
+                    aviso.innerHTML = `💡 <b>Produto Reconhecido!</b><br>
+                        Último preço pago há ${diffDias} dias no "${h.local}": 
+                        <b style="color:#d63031;">R$ ${parseFloat(h.preco).toFixed(2).replace('.',',')}</b>`;
+                } else {
+                    aviso.style.display = 'none';
+                }
+            } catch (e) { console.error("Erro na busca de histórico", e); }
+        };
+
+        // Escuta quando o GTIN é digitado ou colado
+        gtinInput.addEventListener('change', () => verificarHistorico(gtinInput.value));
 
         const carregarTudo = async () => {
             try {
@@ -132,11 +178,10 @@
                 ]);
                 const jsonD = await resD.json();
                 const jsonL = await resL.json();
-                
                 compras = jsonD.data;
                 document.getElementById('localSelect').innerHTML = jsonL.data.map(l => `<option value="${l}">${l}</option>`).join('');
                 render();
-            } catch (e) { console.error("Erro ao carregar dados:", e); }
+            } catch (e) { console.error(e); }
         };
 
         form.onsubmit = async (e) => {
@@ -150,45 +195,30 @@
                 qtd: document.getElementById('qtd').value,
                 unidade: document.getElementById('unidade').value,
                 preco: document.getElementById('preco').value,
-                gtin: document.getElementById('gtin').value || "S/G",
+                gtin: gtinInput.value || "S/G",
                 local: document.getElementById('localSelect').value
             };
 
             const action = isEditing ? 'update' : 'write';
             const ts = document.getElementById('edit-timestamp').value;
-            
-            // Montagem correta da URL: timestamp deve ser um parâmetro separado para a função update
             let url = `${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}`;
-            if (isEditing) {
-                url += `&timestamp=${encodeURIComponent(ts)}`;
-            }
+            if (isEditing) url += `&timestamp=${encodeURIComponent(ts)}`;
 
             try {
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                if(result.status === 'success') {
-                    alert(isEditing ? "✅ Atualizado com sucesso!" : "✅ Guardado com sucesso!");
-                    resetarForm();
-                    await carregarTudo();
-                } else {
-                    alert("❌ Erro: " + result.message);
-                }
-            } catch (err) { 
-                alert("🚨 Erro de conexão com o servidor."); 
-            } finally { 
-                mainBtn.disabled = false; 
-            }
+                await fetch(url);
+                resetarForm();
+                await carregarTudo();
+            } catch (err) { alert("Erro ao salvar"); }
+            finally { mainBtn.disabled = false; }
         };
 
         window.prepararEdicao = (ts) => {
             const item = compras.find(c => c.timestamp == ts);
-            if (!item) return;
-
             isEditing = true;
             title.textContent = "✏️ Editando Compra";
             mainBtn.textContent = "Atualizar Compra";
             mainBtn.className = "btn-edit-mode";
+            aviso.style.display = 'none';
             
             document.getElementById('edit-timestamp').value = item.timestamp;
             document.getElementById('produto').value = item.produto;
@@ -198,7 +228,6 @@
             document.getElementById('gtin').value = item.gtin;
             document.getElementById('dataCompra').value = item.data.split('T')[0];
             document.getElementById('localSelect').value = item.local;
-            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -209,18 +238,16 @@
             title.textContent = "Nova Compra";
             mainBtn.textContent = "Adicionar Compra";
             mainBtn.className = "btn-add";
+            aviso.style.display = 'none';
             document.getElementById('edit-timestamp').value = "";
         };
 
         document.getElementById('limparButton').onclick = resetarForm;
 
         window.excluirItem = async (ts) => {
-            if (confirm("Deseja eliminar este item permanentemente?")) {
-                try {
-                    const res = await fetch(`${WEB_APP_URL}?action=delete&timestamp=${encodeURIComponent(ts)}`);
-                    const json = await res.json();
-                    if(json.status === 'success') carregarTudo();
-                } catch (e) { alert("Erro ao eliminar."); }
+            if (confirm("Excluir item?")) {
+                await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`);
+                carregarTudo();
             }
         };
 
@@ -234,12 +261,12 @@
                     <li class="item-compra">
                         <div>
                             <b>${c.produto} <span class="unit-badge">${c.qtd}${c.unidade}</span></b>
-                            <small>${new Date(c.data).toLocaleDateString('pt-BR')} | ${c.local}</small>
+                            <small>${new Date(c.data).toLocaleDateString()} | ${c.local}</small>
                             <span style="color:#28a745; font-weight:bold;">R$ ${p.toFixed(2)}</span>
                         </div>
                         <div style="display:flex; gap:5px;">
-                            <button class="btn-action" onclick="prepararEdicao('${c.timestamp}')">✏️</button>
-                            <button class="btn-action" onclick="excluirItem('${c.timestamp}')" style="color:red; border-color: #fab1a0;">🗑️</button>
+                            <button onclick="prepararEdicao('${c.timestamp}')">✏️</button>
+                            <button onclick="excluirItem('${c.timestamp}')" style="color:red;">🗑️</button>
                         </div>
                     </li>
                 `;
@@ -252,16 +279,15 @@
             html5QrcodeScanner = new Html5Qrcode("reader");
             html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
             (text) => {
-                document.getElementById('gtin').value = text;
+                gtinInput.value = text;
                 fecharScanner();
+                verificarHistorico(text); // Dispara a busca automática após o scan
             }, () => {});
         };
 
         window.fecharScanner = () => {
             document.getElementById('barcodeModal').style.display = "none";
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().catch(err => console.log("Erro ao parar scanner", err));
-            }
+            if (html5QrcodeScanner) html5QrcodeScanner.stop().catch(() => {});
         };
 
         carregarTudo();
