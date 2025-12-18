@@ -3,35 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Compras Mensais v2</title>
+    <title>Controle de Compras Mensais v3</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border-radius: 12px; }
-        h1 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 15px; text-align: center; }
+        /* (Mantenha os estilos anteriores e adicione estes) */
+        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background-color: #f0f2f5; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1em; }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-        button { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; min-width: 140px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; }
         .btn-add { background-color: #28a745; color: white; }
+        .btn-edit-mode { background-color: #fd7e14; color: white; }
         .btn-scan { background-color: #007bff; color: white; }
-        .btn-clear { background-color: #dc3545; color: white; }
-        button:hover { opacity: 0.85; transform: translateY(-1px); }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-        
-        #listaCompras { list-style: none; padding: 0; margin-top: 20px; }
-        .item-compra { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .item-info { flex-grow: 1; }
-        .item-info strong { display: block; color: #0056b3; margin-bottom: 4px; }
-        .item-info small { color: #666; display: block; }
-        .item-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-delete { background: none; color: #dc3545; border: 1px solid #dc3545; padding: 5px 10px; min-width: auto; font-size: 1.2em; }
-        .btn-delete:hover { background: #dc3545; color: white; }
-        
-        .total-box { background: #e7f3ff; padding: 15px; border-radius: 8px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .total-valor { font-size: 1.4em; font-weight: bold; color: #d63031; }
-        
+        .item-compra { border: 1px solid #eee; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; border-radius: 8px; }
+        .btn-action { background: none; border: 1px solid #ddd; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        .total-box { background: #e7f3ff; padding: 15px; border-radius: 8px; font-weight: bold; margin: 20px 0; display: flex; justify-content: space-between; }
         .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
         .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 10px; }
     </style>
@@ -39,54 +26,46 @@
 <body>
 
 <div class="container">
-    <h1>Controle de Compras</h1>
+    <h1 id="form-title">Nova Compra</h1>
 
     <form id="addCompraForm">
+        <input type="hidden" id="edit-timestamp">
+        
         <div class="form-group">
-            <label for="produto">Produto:</label>
-            <input type="text" id="produto" required placeholder="Nome do item">
-        </div>
-        <div class="form-group">
-            <label for="gtin">Código de Barras (GTIN):</label>
-            <input type="text" id="gtin" placeholder="Preenchido via scanner">
+            <label>Produto:</label>
+            <input type="text" id="produto" required>
         </div>
         <div style="display: flex; gap: 10px;">
             <div class="form-group" style="flex: 1;">
-                <label for="preco">Preço (R$):</label>
+                <label>Preço (R$):</label>
                 <input type="number" id="preco" step="0.01" required>
             </div>
             <div class="form-group" style="flex: 1;">
-                <label for="dataCompra">Data:</label>
+                <label>Data:</label>
                 <input type="date" id="dataCompra" required>
             </div>
         </div>
         <div style="display: flex; gap: 10px;">
             <div class="form-group" style="flex: 1;">
-                <label for="localSelect">Local:</label>
+                <label>Local:</label>
                 <select id="localSelect"></select>
             </div>
             <div class="form-group" style="flex: 1;">
-                <label for="categoriaSelect">Categoria:</label>
-                <select id="categoriaSelect">
-                    <option value="Alimentação">Alimentação</option>
-                    <option value="Limpeza">Limpeza</option>
-                    <option value="Higiene">Higiene</option>
-                    <option value="Hortifruti">Hortifruti</option>
-                    <option value="Outros">Outros</option>
-                </select>
+                <label>GTIN:</label>
+                <input type="text" id="gtin">
             </div>
         </div>
         
         <div class="btn-group">
-            <button type="submit" id="addCompraButton" class="btn-add">Adicionar Compra</button>
-            <button type="button" id="scanButton" class="btn-scan">Escanear Código</button>
-            <button type="button" id="limparButton" class="btn-clear">Limpar</button>
+            <button type="submit" id="mainButton" class="btn-add">Adicionar Compra</button>
+            <button type="button" id="cancelEdit" style="display:none; background:#6c757d; color:white;">Cancelar Edição</button>
+            <button type="button" id="scanButton" class="btn-scan">📷 Scanner</button>
         </div>
     </form>
     
     <div class="total-box">
-        <span>Total no Período:</span>
-        <span class="total-valor" id="totalGasto">R$ 0,00</span>
+        <span>Total:</span>
+        <span id="totalGasto" style="color:#d63031">R$ 0,00</span>
     </div>
 
     <ul id="listaCompras"></ul>
@@ -94,138 +73,127 @@
 
 <div id="barcodeModal" class="modal">
     <div class="modal-content">
-        <span class="close" id="closeModal" style="float:right; cursor:pointer;">&times;</span>
-        <h2>Escaneamento</h2>
+        <span onclick="document.getElementById('barcodeModal').style.display='none'" style="float:right; cursor:pointer;">&times;</span>
+        <h2>Scanner</h2>
         <div id="reader"></div>
     </div>
 </div>
 
 <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVXCbI9Ihl3C9Yr-Jy8aowZXcfx3dSpAbQ1P8rUrPkOwSKjhnTlcTTPId7R1FYhpbRJQ/exec'; 
-
     let compras = [];
-    let html5QrcodeScanner;
+    let isEditing = false;
 
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('addCompraForm');
-        const dataInput = document.getElementById('dataCompra');
-        dataInput.valueAsDate = new Date();
+        const mainBtn = document.getElementById('mainButton');
+        const cancelBtn = document.getElementById('cancelEdit');
+        const title = document.getElementById('form-title');
 
-        // --- BUSCAR DADOS (HISTÓRICO) ---
-        const carregarHistorico = async () => {
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=read`);
-                const json = await res.json();
-                if (json.status === 'success') {
-                    compras = json.data;
-                    renderizarLista();
-                }
-            } catch (e) { console.error("Erro ao carregar histórico", e); }
+        const carregarDados = async () => {
+            const res = await fetch(`${WEB_APP_URL}?action=read`);
+            const json = await res.json();
+            compras = json.data;
+            renderizar();
         };
 
-        // --- BUSCAR LOCAIS (DA ABA CONFIG) ---
         const carregarLocais = async () => {
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=getLocais`);
-                const json = await res.json();
-                const select = document.getElementById('localSelect');
-                select.innerHTML = '';
-                json.data.forEach(local => {
-                    const opt = document.createElement('option');
-                    opt.value = opt.textContent = local;
-                    select.appendChild(opt);
-                });
-            } catch (e) { console.error("Erro ao carregar locais", e); }
+            const res = await fetch(`${WEB_APP_URL}?action=getLocais`);
+            const json = await res.json();
+            const select = document.getElementById('localSelect');
+            select.innerHTML = json.data.map(l => `<option value="${l}">${l}</option>`).join('');
         };
 
-        // --- SALVAR COMPRA ---
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('addCompraButton');
-            btn.disabled = true; btn.textContent = "Enviando...";
+            mainBtn.disabled = true;
+            mainBtn.textContent = "Processando...";
 
             const dados = {
-                data: dataInput.value,
+                data: document.getElementById('dataCompra').value,
                 produto: document.getElementById('produto').value,
                 gtin: document.getElementById('gtin').value || "S/G",
                 preco: document.getElementById('preco').value,
-                local: document.getElementById('localSelect').value,
-                categoria: document.getElementById('categoriaSelect').value
+                local: document.getElementById('localSelect').value
             };
 
+            const action = isEditing ? 'update' : 'write';
+            const ts = document.getElementById('edit-timestamp').value;
+            const url = `${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+encodeURIComponent(ts) : ''}`;
+
             try {
-                const res = await fetch(`${WEB_APP_URL}?action=write&data=${encodeURIComponent(JSON.stringify(dados))}`);
-                const resJson = await res.json();
-                if (resJson.status === 'success') {
-                    alert("Salvo!");
-                    form.reset();
-                    dataInput.valueAsDate = new Date();
-                    carregarHistorico();
-                }
-            } catch (err) { alert("Erro ao salvar"); }
-            finally { btn.disabled = false; btn.textContent = "Adicionar Compra"; }
+                await fetch(url);
+                alert(isEditing ? "Atualizado!" : "Salvo!");
+                resetarForm();
+                carregarDados();
+            } catch (err) { alert("Erro na operação"); }
+            finally { mainBtn.disabled = false; }
         });
 
-        // --- EXCLUIR COMPRA ---
-        window.excluirItem = async (timestamp) => {
-            if (!confirm("Deseja apagar este item permanentemente?")) return;
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=delete&timestamp=${encodeURIComponent(timestamp)}`);
-                const json = await res.json();
-                if (json.status === 'success') {
-                    alert("Excluído!");
-                    carregarHistorico();
-                }
-            } catch (e) { alert("Erro ao excluir"); }
+        window.prepararEdicao = (ts) => {
+            const item = compras.find(c => c.timestamp == ts);
+            if (!item) return;
+
+            isEditing = true;
+            title.textContent = "Editando Compra";
+            mainBtn.textContent = "Atualizar Compra";
+            mainBtn.className = "btn-edit-mode";
+            cancelBtn.style.display = "block";
+
+            document.getElementById('edit-timestamp').value = item.timestamp;
+            document.getElementById('produto').value = item.produto;
+            document.getElementById('preco').value = item.preco;
+            document.getElementById('gtin').value = item.gtin;
+            document.getElementById('dataCompra').value = item.data.split('T')[0];
+            document.getElementById('localSelect').value = item.local;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // --- RENDERIZAR LISTA ---
-        const renderizarLista = () => {
+        const resetarForm = () => {
+            isEditing = false;
+            form.reset();
+            document.getElementById('dataCompra').valueAsDate = new Date();
+            title.textContent = "Nova Compra";
+            mainBtn.textContent = "Adicionar Compra";
+            mainBtn.className = "btn-add";
+            cancelBtn.style.display = "none";
+        };
+
+        cancelBtn.onclick = resetarForm;
+
+        window.excluirItem = async (ts) => {
+            if (confirm("Excluir?")) {
+                await fetch(`${WEB_APP_URL}?action=delete&timestamp=${encodeURIComponent(ts)}`);
+                carregarDados();
+            }
+        };
+
+        const renderizar = () => {
             const lista = document.getElementById('listaCompras');
-            const totalValor = document.getElementById('totalGasto');
-            lista.innerHTML = '';
-            let somaTotal = 0;
-
-            compras.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(c => {
-                const precoNum = parseFloat(c.preco) || 0;
-                somaTotal += precoNum;
-                const li = document.createElement('li');
-                li.className = 'item-compra';
-                li.innerHTML = `
-                    <div class="item-info">
-                        <strong>${c.produto}</strong>
-                        <small>${new Date(c.data).toLocaleDateString('pt-BR')} | ${c.local}</small>
-                        <small style="color:#28a745">${c.preco ? 'R$ ' + precoNum.toFixed(2) : ''}</small>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn-delete" onclick="excluirItem('${c.timestamp}')">🗑️</button>
-                    </div>
+            let total = 0;
+            lista.innerHTML = compras.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(c => {
+                const p = parseFloat(c.preco) || 0;
+                total += p;
+                return `
+                    <li class="item-compra">
+                        <div>
+                            <strong>${c.produto}</strong>
+                            <small>${new Date(c.data).toLocaleDateString()} | ${c.local}</small><br>
+                            <span style="color:#28a745">R$ ${p.toFixed(2)}</span>
+                        </div>
+                        <div>
+                            <button class="btn-action" onclick="prepararEdicao('${c.timestamp}')">✏️</button>
+                            <button class="btn-action" onclick="excluirItem('${c.timestamp}')" style="color:red">🗑️</button>
+                        </div>
+                    </li>
                 `;
-                lista.appendChild(li);
-            });
-            totalValor.textContent = `R$ ${somaTotal.toFixed(2).replace('.', ',')}`;
+            }).join('');
+            document.getElementById('totalGasto').textContent = `R$ ${total.toFixed(2).replace('.',',')}`;
         };
 
-        // --- SCANNER ---
-        document.getElementById('scanButton').onclick = () => {
-            document.getElementById('barcodeModal').style.display = "block";
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-            (text) => {
-                document.getElementById('gtin').value = text;
-                html5QrcodeScanner.stop();
-                document.getElementById('barcodeModal').style.display = "none";
-            }, () => {});
-        };
-
-        document.getElementById('closeModal').onclick = () => {
-            document.getElementById('barcodeModal').style.display = "none";
-            if (html5QrcodeScanner) html5QrcodeScanner.stop();
-        };
-
-        // Inicializar
         carregarLocais();
-        carregarHistorico();
+        carregarDados();
     });
 </script>
 </body>
