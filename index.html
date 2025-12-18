@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Compras v4.1 - Completo</title>
+    <title>Controle de Compras v4.2 - Precisão Total</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 15px; background-color: #f0f2f5; color: #333; }
@@ -27,7 +27,7 @@
         #listaCompras { list-style: none; padding: 0; }
         .item-compra { background: #fff; border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .item-info b { color: #0056b3; display: block; }
-        .unit-badge { background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #444; }
+        .unit-badge { background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #444; margin-left: 5px; }
         
         .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
         .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 10px; position: relative; }
@@ -95,7 +95,7 @@
     </form>
     
     <div class="total-box">
-        <span>Total:</span>
+        <span>Total Acumulado:</span>
         <span class="total-valor" id="totalGasto">R$ 0,00</span>
     </div>
 
@@ -136,7 +136,7 @@
                 compras = jsonD.data;
                 document.getElementById('localSelect').innerHTML = jsonL.data.map(l => `<option value="${l}">${l}</option>`).join('');
                 render();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Erro ao carregar dados:", e); }
         };
 
         form.onsubmit = async (e) => {
@@ -156,18 +156,35 @@
 
             const action = isEditing ? 'update' : 'write';
             const ts = document.getElementById('edit-timestamp').value;
-            const url = `${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+ts : ''}`;
+            
+            // Montagem correta da URL: timestamp deve ser um parâmetro separado para a função update
+            let url = `${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}`;
+            if (isEditing) {
+                url += `&timestamp=${encodeURIComponent(ts)}`;
+            }
 
             try {
-                await fetch(url);
-                resetarForm();
-                await carregarTudo();
-            } catch (err) { alert("Erro ao salvar"); }
-            finally { mainBtn.disabled = false; }
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    alert(isEditing ? "✅ Atualizado com sucesso!" : "✅ Guardado com sucesso!");
+                    resetarForm();
+                    await carregarTudo();
+                } else {
+                    alert("❌ Erro: " + result.message);
+                }
+            } catch (err) { 
+                alert("🚨 Erro de conexão com o servidor."); 
+            } finally { 
+                mainBtn.disabled = false; 
+            }
         };
 
         window.prepararEdicao = (ts) => {
             const item = compras.find(c => c.timestamp == ts);
+            if (!item) return;
+
             isEditing = true;
             title.textContent = "✏️ Editando Compra";
             mainBtn.textContent = "Atualizar Compra";
@@ -198,9 +215,12 @@
         document.getElementById('limparButton').onclick = resetarForm;
 
         window.excluirItem = async (ts) => {
-            if (confirm("Excluir permanentemente?")) {
-                await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`);
-                carregarTudo();
+            if (confirm("Deseja eliminar este item permanentemente?")) {
+                try {
+                    const res = await fetch(`${WEB_APP_URL}?action=delete&timestamp=${encodeURIComponent(ts)}`);
+                    const json = await res.json();
+                    if(json.status === 'success') carregarTudo();
+                } catch (e) { alert("Erro ao eliminar."); }
             }
         };
 
@@ -213,14 +233,13 @@
                 return `
                     <li class="item-compra">
                         <div>
-                            <b>${c.produto}</b>
-                            <span class="unit-badge">${c.qtd}${c.unidade}</span>
-                            <small>${new Date(c.data).toLocaleDateString()} | ${c.local}</small>
+                            <b>${c.produto} <span class="unit-badge">${c.qtd}${c.unidade}</span></b>
+                            <small>${new Date(c.data).toLocaleDateString('pt-BR')} | ${c.local}</small>
                             <span style="color:#28a745; font-weight:bold;">R$ ${p.toFixed(2)}</span>
                         </div>
                         <div style="display:flex; gap:5px;">
-                            <button onclick="prepararEdicao('${c.timestamp}')" style="background:none; border:1px solid #ddd; padding:5px;">✏️</button>
-                            <button onclick="excluirItem('${c.timestamp}')" style="background:none; border:1px solid #ddd; padding:5px; color:red;">🗑️</button>
+                            <button class="btn-action" onclick="prepararEdicao('${c.timestamp}')">✏️</button>
+                            <button class="btn-action" onclick="excluirItem('${c.timestamp}')" style="color:red; border-color: #fab1a0;">🗑️</button>
                         </div>
                     </li>
                 `;
@@ -240,7 +259,9 @@
 
         window.fecharScanner = () => {
             document.getElementById('barcodeModal').style.display = "none";
-            if (html5QrcodeScanner) html5QrcodeScanner.stop();
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(err => console.log("Erro ao parar scanner", err));
+            }
         };
 
         carregarTudo();
