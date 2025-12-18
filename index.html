@@ -3,268 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Compras Mensais v3.1</title>
+    <title>Compras Precisão v4</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border-radius: 12px; }
-        h1 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 15px; text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1em; }
-        
-        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-        button { padding: 12px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; min-width: 120px; }
-        
-        .btn-add { background-color: #28a745; color: white; }
-        .btn-edit-mode { background-color: #fd7e14; color: white; }
-        .btn-scan { background-color: #007bff; color: white; }
-        .btn-clear { background-color: #dc3545; color: white; }
-        .btn-cancel { background-color: #6c757d; color: white; }
-        
-        button:hover { opacity: 0.85; transform: translateY(-1px); }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-        
-        #listaCompras { list-style: none; padding: 0; margin-top: 20px; }
-        .item-compra { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .item-info { flex-grow: 1; }
-        .item-info strong { display: block; color: #0056b3; margin-bottom: 4px; }
-        .item-info small { color: #666; display: block; }
-        .item-actions { display: flex; gap: 8px; }
-        .btn-action { background: none; border: 1px solid #ddd; padding: 8px; cursor: pointer; border-radius: 6px; font-size: 1.1em; transition: 0.2s; }
-        .btn-action:hover { background-color: #f8f9fa; border-color: #bbb; }
-        
-        .total-box { background: #e7f3ff; padding: 15px; border-radius: 8px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center; }
-        .total-valor { font-size: 1.4em; font-weight: bold; color: #d63031; }
-        
-        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 10px; position: relative; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 15px; background: #f0f2f5; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .form-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 120px; display: flex; flex-direction: column; }
+        label { font-weight: bold; font-size: 0.85em; margin-bottom: 4px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .btn-group { display: flex; gap: 8px; margin-top: 15px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-clear { background: #dc3545; color: white; }
+        .item-compra { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
+        .item-info b { color: #0056b3; }
+        .unit-badge { background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; color: #555; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h1 id="form-title">Nova Compra</h1>
-
+    <h2 id="form-title">Nova Compra</h2>
     <form id="addCompraForm">
         <input type="hidden" id="edit-timestamp">
-        
-        <div class="form-group">
-            <label for="produto">Produto:</label>
-            <input type="text" id="produto" required placeholder="Nome do item">
+        <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+                <label>Produto:</label>
+                <input type="text" id="produto" required>
+            </div>
         </div>
-        
-        <div style="display: flex; gap: 10px;">
-            <div class="form-group" style="flex: 1;">
-                <label for="preco">Preço (R$):</label>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Qtd:</label>
+                <input type="number" id="qtd" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label>Unidade:</label>
+                <select id="unidade">
+                    <option value="un">un</option>
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                    <option value="L">L</option>
+                    <option value="ml">ml</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Preço R$:</label>
                 <input type="number" id="preco" step="0.01" required>
             </div>
-            <div class="form-group" style="flex: 1;">
-                <label for="dataCompra">Data:</label>
-                <input type="date" id="dataCompra" required>
-            </div>
         </div>
-
-        <div style="display: flex; gap: 10px;">
-            <div class="form-group" style="flex: 1;">
-                <label for="localSelect">Local:</label>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Local:</label>
                 <select id="localSelect"></select>
             </div>
-            <div class="form-group" style="flex: 1;">
-                <label for="gtin">GTIN / Código:</label>
-                <input type="text" id="gtin" placeholder="Opcional">
+            <div class="form-group">
+                <label>Data:</label>
+                <input type="date" id="dataCompra">
             </div>
         </div>
-        
         <div class="btn-group">
-            <button type="submit" id="mainButton" class="btn-add">Adicionar Compra</button>
-            <button type="button" id="cancelEdit" class="btn-cancel" style="display:none;">Cancelar Edição</button>
-            <button type="button" id="limparButton" class="btn-clear">Limpar</button>
-            <button type="button" id="scanButton" class="btn-scan">📷 Scanner</button>
+            <button type="submit" id="mainBtn" class="btn-add">Salvar</button>
+            <button type="button" id="limparBtn" class="btn-clear">Limpar</button>
         </div>
     </form>
-    
-    <div class="total-box">
-        <span>Total Acumulado:</span>
-        <span class="total-valor" id="totalGasto">R$ 0,00</span>
-    </div>
-
-    <ul id="listaCompras"></ul>
-</div>
-
-<div id="barcodeModal" class="modal">
-    <div class="modal-content">
-        <span onclick="fecharScanner()" style="position:absolute; right:15px; top:10px; font-size:25px; cursor:pointer;">&times;</span>
-        <h2>Escanear Código</h2>
-        <div id="reader"></div>
-    </div>
+    <div style="margin-top:20px; font-weight:bold; text-align:right;">Total: <span id="totalGasto">R$ 0,00</span></div>
+    <ul id="listaCompras" style="list-style:none; padding:0;"></ul>
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVXCbI9Ihl3C9Yr-Jy8aowZXcfx3dSpAbQ1P8rUrPkOwSKjhnTlcTTPId7R1FYhpbRJQ/exec'; 
-
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVXCbI9Ihl3C9Yr-Jy8aowZXcfx3dSpAbQ1P8rUrPkOwSKjhnTlcTTPId7R1FYhpbRJQ/exec';
     let compras = [];
     let isEditing = false;
-    let html5QrcodeScanner;
 
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('addCompraForm');
-        const mainBtn = document.getElementById('mainButton');
-        const cancelBtn = document.getElementById('cancelEdit');
-        const limparBtn = document.getElementById('limparButton');
-        const title = document.getElementById('form-title');
-        const dataInput = document.getElementById('dataCompra');
+        document.getElementById('dataCompra').valueAsDate = new Date();
 
-        // Inicializar Data
-        dataInput.valueAsDate = new Date();
-
-        // --- FUNÇÃO: BUSCAR DADOS ---
-        const carregarDados = async () => {
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=read`);
-                const json = await res.json();
-                if (json.status === 'success') {
-                    compras = json.data;
-                    renderizar();
-                }
-            } catch (e) { console.error("Erro ao carregar dados", e); }
+        const carregar = async () => {
+            const [resD, resL] = await Promise.all([fetch(`${WEB_APP_URL}?action=read`), fetch(`${WEB_APP_URL}?action=getLocais`)]);
+            const [jsonD, jsonL] = await Promise.all([resD.json(), resL.json()]);
+            compras = jsonD.data;
+            document.getElementById('localSelect').innerHTML = jsonL.data.map(l => `<option value="${l}">${l}</option>`).join('');
+            render();
         };
 
-        // --- FUNÇÃO: BUSCAR LOCAIS ---
-        const carregarLocais = async () => {
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=getLocais`);
-                const json = await res.json();
-                const select = document.getElementById('localSelect');
-                select.innerHTML = json.data.map(l => `<option value="${l}">${l}</option>`).join('');
-            } catch (e) { console.error("Erro ao carregar locais", e); }
-        };
-
-        // --- EVENTO: SALVAR OU ATUALIZAR ---
-        form.addEventListener('submit', async (e) => {
+        form.onsubmit = async (e) => {
             e.preventDefault();
-            mainBtn.disabled = true;
-            mainBtn.textContent = "Processando...";
-
+            const btn = document.getElementById('mainBtn');
+            btn.disabled = true;
             const dados = {
-                data: dataInput.value,
+                data: document.getElementById('dataCompra').value,
                 produto: document.getElementById('produto').value,
-                gtin: document.getElementById('gtin').value || "S/G",
+                qtd: document.getElementById('qtd').value,
+                unidade: document.getElementById('unidade').value,
                 preco: document.getElementById('preco').value,
-                local: document.getElementById('localSelect').value
+                local: document.getElementById('localSelect').value,
+                gtin: "S/G"
             };
-
-            const action = isEditing ? 'update' : 'write';
             const ts = document.getElementById('edit-timestamp').value;
-            const url = `${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+encodeURIComponent(ts) : ''}`;
+            const action = isEditing ? 'update' : 'write';
+            await fetch(`${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+ts : ''}`);
+            form.reset();
+            document.getElementById('dataCompra').valueAsDate = new Date();
+            isEditing = false;
+            btn.disabled = false;
+            btn.textContent = "Salvar";
+            carregar();
+        };
 
-            try {
-                const res = await fetch(url);
-                const resJson = await res.json();
-                if (resJson.status === 'success') {
-                    alert(isEditing ? "✅ Item atualizado!" : "✅ Item salvo!");
-                    resetarForm();
-                    carregarDados();
-                }
-            } catch (err) { alert("🚨 Erro na conexão"); }
-            finally { mainBtn.disabled = false; }
-        });
-
-        // --- FUNÇÃO: PREPARAR EDIÇÃO ---
         window.prepararEdicao = (ts) => {
             const item = compras.find(c => c.timestamp == ts);
-            if (!item) return;
-
             isEditing = true;
-            title.textContent = "✏️ Editando Compra";
-            mainBtn.textContent = "Atualizar Compra";
-            mainBtn.className = "btn-edit-mode";
-            cancelBtn.style.display = "block";
-            limparBtn.style.display = "none";
-
+            document.getElementById('form-title').textContent = "Editando...";
+            document.getElementById('mainBtn').textContent = "Atualizar";
             document.getElementById('edit-timestamp').value = item.timestamp;
             document.getElementById('produto').value = item.produto;
+            document.getElementById('qtd').value = item.qtd;
+            document.getElementById('unidade').value = item.unidade;
             document.getElementById('preco').value = item.preco;
-            document.getElementById('gtin').value = item.gtin;
             document.getElementById('dataCompra').value = item.data.split('T')[0];
-            document.getElementById('localSelect').value = item.local;
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0,0);
         };
 
-        // --- FUNÇÃO: RESETAR FORMULÁRIO ---
-        const resetarForm = () => {
-            isEditing = false;
-            form.reset();
-            dataInput.valueAsDate = new Date();
-            title.textContent = "Nova Compra";
-            mainBtn.textContent = "Adicionar Compra";
-            mainBtn.className = "btn-add";
-            cancelBtn.style.display = "none";
-            limparBtn.style.display = "block";
-            document.getElementById('edit-timestamp').value = "";
-        };
-
-        cancelBtn.onclick = resetarForm;
-        limparBtn.onclick = resetarForm;
-
-        // --- FUNÇÃO: EXCLUIR ---
-        window.excluirItem = async (ts) => {
-            if (confirm("Tem certeza que deseja excluir este item?")) {
-                try {
-                    const res = await fetch(`${WEB_APP_URL}?action=delete&timestamp=${encodeURIComponent(ts)}`);
-                    const json = await res.json();
-                    if (json.status === 'success') carregarDados();
-                } catch (e) { alert("Erro ao excluir"); }
+        window.excluir = async (ts) => {
+            if (confirm("Excluir?")) {
+                await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`);
+                carregar();
             }
         };
 
-        // --- FUNÇÃO: RENDERIZAR LISTA ---
-        const renderizar = () => {
-            const lista = document.getElementById('listaCompras');
+        const render = () => {
             let total = 0;
-            
-            const listaHTML = compras.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(c => {
+            document.getElementById('listaCompras').innerHTML = compras.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(c => {
                 const p = parseFloat(c.preco) || 0;
                 total += p;
-                return `
-                    <li class="item-compra">
-                        <div class="item-info">
-                            <strong>${c.produto}</strong>
-                            <small>${new Date(c.data).toLocaleDateString('pt-BR')} | ${c.local}</small>
-                            <span style="color:#28a745; font-weight:bold;">R$ ${p.toFixed(2)}</span>
-                        </div>
-                        <div class="item-actions">
-                            <button class="btn-action" onclick="prepararEdicao('${c.timestamp}')">✏️</button>
-                            <button class="btn-action" onclick="excluirItem('${c.timestamp}')" style="color:#d63031; border-color:#fab1a0;">🗑️</button>
-                        </div>
-                    </li>
-                `;
+                return `<li class="item-compra">
+                    <div class="item-info">
+                        <b>${c.produto}</b> <span class="unit-badge">${c.qtd}${c.unidade}</span><br>
+                        <small>${new Date(c.data).toLocaleDateString()} | R$ ${p.toFixed(2)}</small>
+                    </div>
+                    <div>
+                        <button onclick="prepararEdicao('${c.timestamp}')">✏️</button>
+                        <button onclick="excluir('${c.timestamp}')">🗑️</button>
+                    </div>
+                </li>`;
             }).join('');
-            
-            lista.innerHTML = listaHTML;
-            document.getElementById('totalGasto').textContent = `R$ ${total.toFixed(2).replace('.',',')}`;
+            document.getElementById('totalGasto').textContent = `R$ ${total.toFixed(2)}`;
         };
 
-        // --- SCANNER ---
-        document.getElementById('scanButton').onclick = () => {
-            document.getElementById('barcodeModal').style.display = "block";
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-            (text) => {
-                document.getElementById('gtin').value = text;
-                fecharScanner();
-            }, () => {});
+        document.getElementById('limparBtn').onclick = () => {
+            form.reset();
+            isEditing = false;
+            document.getElementById('form-title').textContent = "Nova Compra";
+            document.getElementById('mainBtn').textContent = "Salvar";
         };
 
-        window.fecharScanner = () => {
-            document.getElementById('barcodeModal').style.display = "none";
-            if (html5QrcodeScanner) html5QrcodeScanner.stop();
-        };
-
-        // Inicializar App
-        carregarLocais();
-        carregarDados();
+        carregar();
     });
 </script>
 </body>
