@@ -3,106 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compras Inteligentes v5.0</title>
+    <title>Smart Purchase Pro v6.0</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 15px; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); border-radius: 12px; }
-        h1 { color: #0056b3; border-bottom: 2px solid #eee; padding-bottom: 10px; text-align: center; font-size: 1.5em; margin-bottom: 10px; }
-        
-        /* Estilo do Aviso de Histórico */
-        #avisoHistorico { display: none; background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; color: #856404; line-height: 1.4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        :root {
+            --primary: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+        }
 
-        .form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 140px; display: flex; flex-direction: column; }
-        label { font-weight: bold; font-size: 0.85em; margin-bottom: 5px; color: #555; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; width: 100%; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+
+        .container { max-width: 600px; margin: -20px auto 40px; padding: 0 15px; }
+
+        .card { 
+            background: var(--card); 
+            padding: 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+            margin-bottom: 20px;
+        }
+
+        /* Aviso Inteligente */
+        #avisoHistorico {
+            display: none;
+            background: #fef3c7;
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: #92400e;
+        }
+
+        .form-row { display: flex; gap: 12px; margin-bottom: 15px; }
+        .form-group { flex: 1; display: flex; flex-direction: column; }
         
-        .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
-        button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; min-width: 110px; transition: 0.2s; }
-        .btn-add { background-color: #28a745; color: white; }
-        .btn-edit-mode { background-color: #fd7e14; color: white; }
-        .btn-scan { background-color: #007bff; color: white; }
-        .btn-clear { background-color: #dc3545; color: white; }
+        label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-sub); margin-bottom: 6px; }
         
-        .total-box { background: #e7f3ff; padding: 15px; border-radius: 8px; margin: 20px 0; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-        .total-valor { font-size: 1.3em; color: #d63031; }
+        input, select { 
+            padding: 12px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            transition: all 0.2s;
+            background: #fdfdfd;
+        }
+
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+        .btn-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 20px; }
         
+        button { 
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 14px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+
+        .btn-add { background: var(--primary); color: white; }
+        .btn-scan { background: #f1f5f9; color: var(--text-main); }
+        .btn-clear { background: #fff1f2; color: var(--danger); }
+
+        button:active { transform: scale(0.98); }
+
+        /* BUSCADOR */
+        .search-box {
+            position: sticky; top: 10px; z-index: 5;
+            background: var(--card); padding: 12px 15px; border-radius: 12px;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+        }
+
+        .search-box input { border: none; padding: 5px; width: 100%; background: transparent; }
+        .search-box input:focus { box-shadow: none; }
+
+        /* LISTA DE CARDS */
         #listaCompras { list-style: none; padding: 0; }
-        .item-compra { background: #fff; border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .item-info b { color: #0056b3; display: block; }
-        .unit-badge { background: #e9ecef; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #444; }
         
-        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 500px; border-radius: 10px; position: relative; }
+        .item-card {
+            background: var(--card); padding: 16px; border-radius: 16px;
+            margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #f1f5f9; transition: 0.2s;
+        }
+
+        .item-card:hover { border-color: var(--primary); }
+
+        .item-info b { display: block; font-size: 1rem; color: var(--text-main); }
+        .item-info span { font-size: 0.8rem; color: var(--text-sub); }
+        .price-tag { font-weight: 700; color: var(--success); font-size: 1.1rem; }
+        
+        .badge { background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
+
+        .actions { display: flex; gap: 10px; }
+        .btn-icon { background: none; padding: 8px; border-radius: 8px; color: var(--text-sub); min-width: auto; flex: none;}
+        .btn-icon:hover { background: #f1f5f9; color: var(--primary); }
+
+        .total-floating {
+            background: var(--text-main); color: white; padding: 15px 20px;
+            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .modal-content { background: white; margin: 20% auto; padding: 25px; width: 85%; border-radius: 20px; }
     </style>
 </head>
 <body>
 
+<div class="header">
+    <h1 id="app-title">Smart Purchase</h1>
+    <p style="font-size: 0.8rem; opacity: 0.8;">Controle Profissional de Compras</p>
+</div>
+
 <div class="container">
-    <h1 id="form-title">Nova Compra</h1>
+    <div class="card">
+        <div id="avisoHistorico"></div>
+        <form id="addCompraForm">
+            <input type="hidden" id="edit-timestamp">
+            
+            <label>Produto</label>
+            <input type="text" id="produto" required style="margin-bottom: 15px;">
 
-    <div id="avisoHistorico"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Qtd</label>
+                    <input type="number" id="qtd" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Unidade</label>
+                    <select id="unidade">
+                        <option value="un">un</option><option value="kg">kg</option>
+                        <option value="g">g</option><option value="L">L</option><option value="ml">ml</option>
+                    </select>
+                </div>
+            </div>
 
-    <form id="addCompraForm">
-        <input type="hidden" id="edit-timestamp">
-        
-        <div class="form-row">
-            <div class="form-group" style="flex: 2;">
-                <label>Produto:</label>
-                <input type="text" id="produto" required placeholder="Ex: Arroz Tio João">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Preço R$</label>
+                    <input type="number" id="preco" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>GTIN / Código</label>
+                    <input type="text" id="gtin">
+                </div>
             </div>
-        </div>
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label>Qtd:</label>
-                <input type="number" id="qtd" step="0.01" required placeholder="0.00">
-            </div>
-            <div class="form-group">
-                <label>Unidade:</label>
-                <select id="unidade">
-                    <option value="un">un</option>
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="L">L</option>
-                    <option value="ml">ml</option>
-                </select>
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label>Preço R$:</label>
-                <input type="number" id="preco" step="0.01" required placeholder="0.00">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Local</label>
+                    <select id="localSelect"></select>
+                </div>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" id="dataCompra">
+                </div>
             </div>
-            <div class="form-group">
-                <label>GTIN / Código:</label>
-                <input type="text" id="gtin" placeholder="Escanear ou digitar">
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label>Local:</label>
-                <select id="localSelect"></select>
+            <div class="btn-grid">
+                <button type="submit" id="mainButton" class="btn-add">
+                    <span class="material-icons">save</span> Salvar Item
+                </button>
+                <button type="button" id="scanButton" class="btn-scan">
+                    <span class="material-icons">qr_code_scanner</span>
+                </button>
             </div>
-            <div class="form-group">
-                <label>Data:</label>
-                <input type="date" id="dataCompra">
-            </div>
-        </div>
-        
-        <div class="btn-group">
-            <button type="submit" id="mainButton" class="btn-add">Adicionar Compra</button>
-            <button type="button" id="limparButton" class="btn-clear">Limpar</button>
-            <button type="button" id="scanButton" class="btn-scan">📷 Scanner</button>
-        </div>
-    </form>
-    
-    <div class="total-box">
-        <span>Total Acumulado:</span>
-        <span class="total-valor" id="totalGasto">R$ 0,00</span>
+            <button type="button" id="limparButton" class="btn-clear" style="width:100%; margin-top:10px;">
+                <span class="material-icons">restart_alt</span> Limpar Campos
+            </button>
+        </form>
+    </div>
+
+    <div class="total-floating">
+        <span>Gasto Total</span>
+        <span id="totalGasto">R$ 0,00</span>
+    </div>
+
+    <div class="search-box">
+        <span class="material-icons" style="color:var(--text-sub)">search</span>
+        <input type="text" id="inputBusca" placeholder="Buscar nos seus itens...">
     </div>
 
     <ul id="listaCompras"></ul>
@@ -110,9 +214,8 @@
 
 <div id="barcodeModal" class="modal">
     <div class="modal-content">
-        <span onclick="fecharScanner()" style="position:absolute; right:15px; top:10px; font-size:25px; cursor:pointer;">&times;</span>
-        <h2>Escanear Código</h2>
         <div id="reader"></div>
+        <button onclick="fecharScanner()" class="btn-clear" style="width:100%; margin-top:15px;">Fechar</button>
     </div>
 </div>
 
@@ -125,101 +228,99 @@
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.getElementById('addCompraForm');
         const mainBtn = document.getElementById('mainButton');
-        const title = document.getElementById('form-title');
-        const dataInput = document.getElementById('dataCompra');
         const aviso = document.getElementById('avisoHistorico');
-        const gtinInput = document.getElementById('gtin');
+        const inputBusca = document.getElementById('inputBusca');
 
-        dataInput.valueAsDate = new Date();
-
-        // --- FUNÇÃO: BUSCAR HISTÓRICO POR GTIN ---
-        const verificarHistorico = async (gtin) => {
-            if (!gtin || gtin === "S/G" || gtin.length < 8) {
-                aviso.style.display = 'none';
-                return;
-            }
-
-            try {
-                const res = await fetch(`${WEB_APP_URL}?action=buscarGTIN&gtin=${gtin}`);
-                const json = await res.json();
-
-                if (json.found) {
-                    const h = json.data;
-                    
-                    // Preenche os campos automaticamente
-                    document.getElementById('produto').value = h.produto;
-                    document.getElementById('qtd').value = h.qtd;
-                    document.getElementById('unidade').value = h.unidade;
-                    
-                    // Calcula a diferença de dias
-                    const dataPassada = new Date(h.data);
-                    const hoje = new Date();
-                    const diffDias = Math.floor((hoje - dataPassada) / (1000 * 60 * 60 * 24));
-                    
-                    // Exibe o aviso inteligente
-                    aviso.style.display = 'block';
-                    aviso.innerHTML = `💡 <b>Produto Reconhecido!</b><br>
-                        Último preço pago há ${diffDias} dias no "${h.local}": 
-                        <b style="color:#d63031;">R$ ${parseFloat(h.preco).toFixed(2).replace('.',',')}</b>`;
-                } else {
-                    aviso.style.display = 'none';
-                }
-            } catch (e) { console.error("Erro na busca de histórico", e); }
-        };
-
-        // Escuta quando o GTIN é digitado ou colado
-        gtinInput.addEventListener('change', () => verificarHistorico(gtinInput.value));
+        document.getElementById('dataCompra').valueAsDate = new Date();
 
         const carregarTudo = async () => {
-            try {
-                const [resD, resL] = await Promise.all([
-                    fetch(`${WEB_APP_URL}?action=read`),
-                    fetch(`${WEB_APP_URL}?action=getLocais`)
-                ]);
-                const jsonD = await resD.json();
-                const jsonL = await resL.json();
-                compras = jsonD.data;
-                document.getElementById('localSelect').innerHTML = jsonL.data.map(l => `<option value="${l}">${l}</option>`).join('');
-                render();
-            } catch (e) { console.error(e); }
+            const [resD, resL] = await Promise.all([
+                fetch(`${WEB_APP_URL}?action=read`),
+                fetch(`${WEB_APP_URL}?action=getLocais`)
+            ]);
+            const jsonD = await resD.json();
+            const jsonL = await resL.json();
+            compras = jsonD.data;
+            document.getElementById('localSelect').innerHTML = jsonL.data.map(l => `<option value="${l}">${l}</option>`).join('');
+            render();
         };
+
+        // --- LÓGICA DE BUSCA (FILTRO) ---
+        inputBusca.addEventListener('input', () => render());
+
+        const render = () => {
+            const termo = inputBusca.value.toLowerCase();
+            let total = 0;
+            const lista = document.getElementById('listaCompras');
+            
+            const filtrados = compras.filter(c => 
+                c.produto.toLowerCase().includes(termo) || 
+                c.local.toLowerCase().includes(termo)
+            );
+
+            lista.innerHTML = filtrados.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(c => {
+                const p = parseFloat(c.preco) || 0;
+                total += p;
+                return `
+                    <li class="item-card">
+                        <div class="item-info">
+                            <b>${c.produto} <span class="badge">${c.qtd}${c.unidade}</span></b>
+                            <span>${new Date(c.data).toLocaleDateString()} • ${c.local}</span>
+                            <div class="price-tag">R$ ${p.toFixed(2).replace('.',',')}</div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-icon" onclick="prepararEdicao('${c.timestamp}')">
+                                <span class="material-icons">edit</span>
+                            </button>
+                            <button class="btn-icon" onclick="excluirItem('${c.timestamp}')" style="color:var(--danger)">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+            document.getElementById('totalGasto').textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        };
+
+        // Verificação de Histórico
+        document.getElementById('gtin').addEventListener('change', async (e) => {
+            const val = e.target.value;
+            if (val.length < 8) return;
+            const res = await fetch(`${WEB_APP_URL}?action=buscarGTIN&gtin=${val}`);
+            const json = await res.json();
+            if (json.found) {
+                const h = json.data;
+                document.getElementById('produto').value = h.produto;
+                document.getElementById('qtd').value = h.qtd;
+                document.getElementById('unidade').value = h.unidade;
+                aviso.style.display = 'block';
+                aviso.innerHTML = `💡 <b>Histórico encontrado:</b> Há ${Math.floor((new Date() - new Date(h.data))/(86400000))} dias custou <b>R$ ${parseFloat(h.preco).toFixed(2)}</b> no ${h.local}.`;
+            }
+        });
 
         form.onsubmit = async (e) => {
             e.preventDefault();
             mainBtn.disabled = true;
-            mainBtn.textContent = "Processando...";
-
             const dados = {
-                data: dataInput.value,
+                data: document.getElementById('dataCompra').value,
                 produto: document.getElementById('produto').value,
                 qtd: document.getElementById('qtd').value,
                 unidade: document.getElementById('unidade').value,
                 preco: document.getElementById('preco').value,
-                gtin: gtinInput.value || "S/G",
+                gtin: document.getElementById('gtin').value || "S/G",
                 local: document.getElementById('localSelect').value
             };
-
-            const action = isEditing ? 'update' : 'write';
             const ts = document.getElementById('edit-timestamp').value;
-            let url = `${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}`;
+            let url = `${WEB_APP_URL}?action=${isEditing ? 'update' : 'write'}&data=${encodeURIComponent(JSON.stringify(dados))}`;
             if (isEditing) url += `&timestamp=${encodeURIComponent(ts)}`;
-
-            try {
-                await fetch(url);
-                resetarForm();
-                await carregarTudo();
-            } catch (err) { alert("Erro ao salvar"); }
-            finally { mainBtn.disabled = false; }
+            await fetch(url);
+            resetarForm();
+            carregarTudo();
         };
 
         window.prepararEdicao = (ts) => {
             const item = compras.find(c => c.timestamp == ts);
             isEditing = true;
-            title.textContent = "✏️ Editando Compra";
-            mainBtn.textContent = "Atualizar Compra";
-            mainBtn.className = "btn-edit-mode";
-            aviso.style.display = 'none';
-            
             document.getElementById('edit-timestamp').value = item.timestamp;
             document.getElementById('produto').value = item.produto;
             document.getElementById('qtd').value = item.qtd;
@@ -234,60 +335,34 @@
         const resetarForm = () => {
             isEditing = false;
             form.reset();
-            dataInput.valueAsDate = new Date();
-            title.textContent = "Nova Compra";
-            mainBtn.textContent = "Adicionar Compra";
-            mainBtn.className = "btn-add";
-            aviso.style.display = 'none';
+            document.getElementById('dataCompra').valueAsDate = new Date();
             document.getElementById('edit-timestamp').value = "";
+            aviso.style.display = 'none';
+            mainBtn.disabled = false;
         };
 
         document.getElementById('limparButton').onclick = resetarForm;
 
         window.excluirItem = async (ts) => {
-            if (confirm("Excluir item?")) {
+            if (confirm("Excluir?")) {
                 await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`);
                 carregarTudo();
             }
         };
 
-        const render = () => {
-            let total = 0;
-            const lista = document.getElementById('listaCompras');
-            lista.innerHTML = compras.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(c => {
-                const p = parseFloat(c.preco) || 0;
-                total += p;
-                return `
-                    <li class="item-compra">
-                        <div>
-                            <b>${c.produto} <span class="unit-badge">${c.qtd}${c.unidade}</span></b>
-                            <small>${new Date(c.data).toLocaleDateString()} | ${c.local}</small>
-                            <span style="color:#28a745; font-weight:bold;">R$ ${p.toFixed(2)}</span>
-                        </div>
-                        <div style="display:flex; gap:5px;">
-                            <button onclick="prepararEdicao('${c.timestamp}')">✏️</button>
-                            <button onclick="excluirItem('${c.timestamp}')" style="color:red;">🗑️</button>
-                        </div>
-                    </li>
-                `;
-            }).join('');
-            document.getElementById('totalGasto').textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-        };
-
         document.getElementById('scanButton').onclick = () => {
             document.getElementById('barcodeModal').style.display = "block";
             html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
-            (text) => {
-                gtinInput.value = text;
+            html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+                document.getElementById('gtin').value = text;
                 fecharScanner();
-                verificarHistorico(text); // Dispara a busca automática após o scan
+                document.getElementById('gtin').dispatchEvent(new Event('change'));
             }, () => {});
         };
 
         window.fecharScanner = () => {
             document.getElementById('barcodeModal').style.display = "none";
-            if (html5QrcodeScanner) html5QrcodeScanner.stop().catch(() => {});
+            if (html5QrcodeScanner) html5QrcodeScanner.stop();
         };
 
         carregarTudo();
