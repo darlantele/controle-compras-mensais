@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Purchase Pro v6.4</title>
+    <title>Smart Purchase Pro v6.5</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -21,15 +21,17 @@
 
         body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg); color: var(--text-main); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-        /* HEADER FIXO */
+        /* HEADER */
         .header {
             background: var(--primary); color: white; padding: 12px 15px;
             display: flex; align-items: center; justify-content: space-between;
             position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .header h1 { font-size: 1.1rem; margin: 0; font-weight: 700; }
+        .header h1 { font-size: 1.1rem; margin: 0; font-weight: 700; flex-grow: 1; text-align: center; }
+        .header-icon { cursor: pointer; display: flex; align-items: center; padding: 5px; border-radius: 50%; transition: background 0.2s; }
+        .header-icon:active { background: rgba(255,255,255,0.2); }
 
-        /* MENU LATERAL MELHORADO */
+        /* SIDEBAR */
         .sidebar {
             position: fixed; left: -280px; top: 0; width: 280px; height: 100%;
             background: var(--card); z-index: 100; transition: 0.3s ease;
@@ -42,67 +44,32 @@
         }
         .sidebar-overlay.active { display: block; }
 
-        /* CONTAINER COM AJUSTE PARA CELULAR */
+        /* CONTAINER & FORM */
         .container { max-width: 600px; margin: 15px auto; padding: 0 12px; box-sizing: border-box; }
-        
-        .card { 
-            background: var(--card); padding: 18px; border-radius: 18px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; 
-            border: 1px solid #f1f5f9; box-sizing: border-box; width: 100%;
-        }
+        .card { background: var(--card); padding: 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #f1f5f9; }
 
-        #avisoHistorico {
-            display: none; background: #fffbeb; border-left: 4px solid var(--warning);
-            padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; color: #92400e;
-        }
-
-        /* AJUSTE DOS CAMPOS PARA NÃO VAZAR */
-        .form-row { 
-            display: flex; gap: 10px; margin-bottom: 12px; width: 100%; 
-            flex-wrap: wrap; /* Permite quebrar linha se não couber */
-        }
-        .form-group { 
-            flex: 1; min-width: 120px; /* Garante tamanho mínimo no celular */
-            display: flex; flex-direction: column; 
-        }
-        .form-group.full { min-width: 100%; }
-
+        .form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 110px; display: flex; flex-direction: column; }
         label { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; }
-        
-        input, select { 
-            padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; 
-            font-size: 1rem; background: #fcfcfc; width: 100%; box-sizing: border-box;
-            appearance: none; /* Melhora visual do select no iPhone */
-        }
+        input, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; background: #fcfcfc; width: 100%; box-sizing: border-box; }
 
-        #calcFeedback { 
-            font-size: 0.85rem; font-weight: 600; color: var(--primary); 
-            background: #eff6ff; padding: 10px; border-radius: 10px; 
-            margin-bottom: 15px; text-align: center; border: 1px dashed var(--primary);
-            display: none;
-        }
+        #calcFeedback { font-size: 0.85rem; font-weight: 600; color: var(--primary); background: #eff6ff; padding: 10px; border-radius: 10px; margin-bottom: 15px; text-align: center; display: none; }
 
         .btn-grid { display: flex; gap: 10px; margin-top: 10px; }
         .btn-main { flex: 3; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-secondary { flex: 1; background: #f1f5f9; color: var(--text-main); border: none; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 
-        /* DASHBOARD MOBILE FRIENDLY */
+        /* LISTA */
         .total-banner { background: var(--text-main); color: white; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        
-        .search-bar { background: white; padding: 10px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
-        .search-bar input { border: none; outline: none; width: 100%; font-size: 1rem; }
-
-        /* LISTA ESTILO CARD */
-        #listaCompras { list-style: none; padding: 0; margin: 0; }
-        .item-card { 
-            background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; 
-            border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;
-        }
+        .item-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
         .price-display { color: var(--success); font-weight: 700; font-size: 1.1rem; }
-        .badge-qty { background: #eff6ff; padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; color: var(--primary); font-weight: 700; }
 
         .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
-        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 20px; box-sizing: border-box; }
+        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 20px; }
+
+        /* Animação de Giro para o Refresh */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spinning { animation: spin 0.6s linear; }
     </style>
 </head>
 <body>
@@ -110,64 +77,44 @@
 <div class="sidebar-overlay" id="overlay"></div>
 <div class="sidebar" id="sidebar">
     <h2 style="font-size: 1rem; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-        <span class="material-icons" style="vertical-align: middle;">tune</span> Ferramentas
+        <span class="material-icons" style="vertical-align: middle;">menu_open</span> Opções
     </h2>
-    <div style="margin-bottom: 20px;">
-        <label>Data Início</label><input type="date" id="filtroDataInicio">
-        <label>Data Fim</label><input type="date" id="filtroDataFim">
-        <button onclick="aplicarFiltros()" class="btn-main" style="width: 100%; padding: 10px; margin-top: 10px;">Filtrar</button>
+    <button onclick="exportarCSV()" class="btn-secondary" style="width: 100%; padding: 12px; margin-bottom: 10px;">
+        <span class="material-icons">download</span> Exportar CSV
+    </button>
+    <div style="margin-top: 20px;">
+        <label>Filtrar Período</label>
+        <input type="date" id="filtroDataInicio" style="margin-bottom: 5px;">
+        <input type="date" id="filtroDataFim">
+        <button onclick="aplicarFiltros()" class="btn-main" style="width: 100%; padding: 10px; margin-top: 5px;">Filtrar</button>
     </div>
-    <button onclick="exportarCSV()" class="btn-secondary" style="width: 100%; padding: 12px; margin-bottom: 10px;">Exportar CSV</button>
-    <button onclick="toggleSidebar()" class="btn-secondary" style="width: 100%; background: #fff1f2; color: var(--danger); margin-top: 40px;">Fechar</button>
+    <button onclick="toggleSidebar()" class="btn-secondary" style="width: 100%; background: #fff1f2; color: var(--danger); margin-top: 40px;">Fechar Menu</button>
 </div>
 
 <div class="header">
-    <div onclick="toggleSidebar()"><span class="material-icons">menu</span></div>
+    <div class="header-icon" onclick="toggleSidebar()"><span class="material-icons">menu</span></div>
     <h1>Smart Purchase</h1>
-    <div style="width: 24px;"></div>
+    <div class="header-icon" id="btnRefresh" onclick="recarregarPagina()"><span class="material-icons">refresh</span></div>
 </div>
 
 <div class="container">
     <div class="card">
-        <div id="avisoHistorico"></div>
         <form id="addCompraForm">
             <input type="hidden" id="edit-timestamp">
-            
-            <div class="form-group full">
+            <div class="form-group" style="margin-bottom: 12px;">
                 <label>Produto</label>
-                <input type="text" id="produto" required placeholder="Ex: Café 500g" style="margin-bottom: 12px;">
+                <input type="text" id="produto" required placeholder="Nome do item">
             </div>
-
             <div class="form-row">
-                <div class="form-group" style="flex: 0.7;">
-                    <label>Qtd</label>
-                    <input type="number" id="qtd" value="1" step="0.01" required>
-                </div>
-                <div class="form-group" style="flex: 0.8;">
-                    <label>Unid</label>
-                    <select id="unidade">
-                        <option value="un">un</option><option value="kg">kg</option>
-                        <option value="g">g</option><option value="L">L</option><option value="ml">ml</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex: 1.2;">
-                    <label>Preço Unit.</label>
-                    <input type="number" id="precoUnit" step="0.01" required placeholder="0,00">
-                </div>
+                <div class="form-group" style="flex: 0.7;"><label>Qtd</label><input type="number" id="qtd" value="1" step="0.01"></div>
+                <div class="form-group" style="flex: 0.8;"><label>Unid</label><select id="unidade"><option value="un">un</option><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option></select></div>
+                <div class="form-group" style="flex: 1.2;"><label>Preço Unit.</label><input type="number" id="precoUnit" step="0.01" required placeholder="0,00"></div>
             </div>
-
             <div id="calcFeedback">Total: R$ 0,00</div>
-
             <div class="form-row">
                 <div class="form-group"><label>GTIN</label><input type="text" id="gtin"></div>
-                <div class="form-group">
-                    <label>Local</label>
-                    <select id="localSelect">
-                        <option>Carregando...</option>
-                    </select>
-                </div>
+                <div class="form-group"><label>Local</label><select id="localSelect"></select></div>
             </div>
-
             <div class="btn-grid">
                 <button type="submit" id="mainButton" class="btn-main"><span class="material-icons">save</span> Salvar</button>
                 <button type="button" onclick="abrirScanner()" class="btn-secondary"><span class="material-icons">qr_code_scanner</span></button>
@@ -176,15 +123,14 @@
     </div>
 
     <div class="total-banner">
-        <span style="font-size: 0.85rem; opacity: 0.8;">Total no Período</span>
+        <span style="font-size: 0.85rem; opacity: 0.8;">Total Exibido</span>
         <span id="totalGasto" style="font-size: 1.3rem; font-weight: 700;">R$ 0,00</span>
     </div>
 
-    <div class="search-bar">
+    <div class="search-bar" style="background: white; padding: 10px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
         <span class="material-icons" style="color: var(--text-sub);">search</span>
-        <input type="text" id="inputBusca" placeholder="Pesquisar itens...">
+        <input type="text" id="inputBusca" placeholder="Pesquisar..." style="border:none; outline:none; width:100%;">
     </div>
-
     <ul id="listaCompras"></ul>
 </div>
 
@@ -196,7 +142,14 @@
     let isEditing = false;
     let scanner;
 
-    // --- CORREÇÃO DO CARREGAMENTO DE LOCAIS ---
+    function recarregarPagina() {
+        const btn = document.getElementById('btnRefresh');
+        btn.classList.add('spinning');
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 300);
+    }
+
     async function carregarTudo() {
         try {
             const [resD, resL] = await Promise.all([
@@ -205,39 +158,30 @@
             ]);
             compras = (await resD.json()).data;
             const locais = (await resL.json()).data;
-            
-            const selectLocal = document.getElementById('localSelect');
-            selectLocal.innerHTML = locais.map(l => `<option value="${l}">${l}</option>`).join('');
+            document.getElementById('localSelect').innerHTML = locais.map(l => `<option value="${l}">${l}</option>`).join('');
             render();
-        } catch (e) { 
-            console.error("Erro ao carregar:", e);
-            document.getElementById('localSelect').innerHTML = "<option>Erro ao carregar</option>";
-        }
+        } catch (e) { console.error(e); }
     }
 
-    // --- LÓGICA DE CÁLCULO UNITÁRIO ---
+    // Cálculos e Renderização mantidos da v6.4...
     const qtdIn = document.getElementById('qtd');
     const precoIn = document.getElementById('precoUnit');
     const feed = document.getElementById('calcFeedback');
 
     function updateCalculo() {
-        const q = parseFloat(qtdIn.value) || 0;
-        const p = parseFloat(precoIn.value) || 0;
-        const total = q * p;
+        const total = (parseFloat(qtdIn.value) || 0) * (parseFloat(precoIn.value) || 0);
         if (total > 0) {
             feed.style.display = 'block';
             feed.textContent = `Total deste item: R$ ${total.toFixed(2).replace('.',',')}`;
         } else { feed.style.display = 'none'; }
         return total;
     }
-    qtdIn.oninput = updateCalculo;
-    precoIn.oninput = updateCalculo;
+    qtdIn.oninput = updateCalculo; precoIn.oninput = updateCalculo;
 
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
     }
-    document.getElementById('overlay').onclick = toggleSidebar;
 
     function render() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
@@ -258,13 +202,13 @@
             return `
                 <li class="item-card">
                     <div style="max-width: 70%;">
-                        <b>${c.produto} <span class="badge-qty">${c.qtd}${c.unidade}</span></b>
-                        <div style="font-size:0.75rem; color:var(--text-sub); margin-top:2px;">${new Date(c.data).toLocaleDateString()} • ${c.local}</div>
+                        <b>${c.produto} <span style="font-size:0.7rem; color:var(--primary); background:#eef2ff; padding:2px 6px; border-radius:5px;">${c.qtd}${c.unidade}</span></b>
+                        <div style="font-size:0.75rem; color:var(--text-sub);">${new Date(c.data).toLocaleDateString()} • ${c.local}</div>
                         <div class="price-display">R$ ${p.toFixed(2).replace('.',',')}</div>
                     </div>
                     <div style="display:flex; gap:10px;">
-                        <span class="material-icons" style="color:var(--text-sub); font-size: 1.4rem;" onclick="prepararEdicao('${c.timestamp}')">edit</span>
-                        <span class="material-icons" style="color:var(--danger); font-size: 1.4rem;" onclick="excluirItem('${c.timestamp}')">delete</span>
+                        <span class="material-icons" style="color:var(--text-sub);" onclick="prepararEdicao('${c.timestamp}')">edit</span>
+                        <span class="material-icons" style="color:var(--danger);" onclick="excluirItem('${c.timestamp}')">delete</span>
                     </div>
                 </li>
             `;
@@ -287,8 +231,7 @@
             local: document.getElementById('localSelect').value
         };
         const ts = document.getElementById('edit-timestamp').value;
-        const action = isEditing ? 'update' : 'write';
-        await fetch(`${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+ts : ''}`);
+        await fetch(`${WEB_APP_URL}?action=${isEditing ? 'update' : 'write'}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+ts : ''}`);
         document.getElementById('addCompraForm').reset();
         isEditing = false; btn.disabled = false;
         carregarTudo();
@@ -308,7 +251,7 @@
         window.scrollTo(0,0);
     };
 
-    window.excluirItem = async (ts) => { if(confirm("Eliminar item?")) { await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`); carregarTudo(); } };
+    window.excluirItem = async (ts) => { if(confirm("Eliminar?")) { await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`); carregarTudo(); } };
     document.getElementById('inputBusca').oninput = render;
 
     function abrirScanner() {
@@ -317,11 +260,9 @@
         scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
             document.getElementById('gtin').value = text;
             fecharScanner();
-            // Aqui você pode disparar a busca por GTIN se desejar
         }, () => {});
     }
     function fecharScanner() { document.getElementById('barcodeModal').style.display = "none"; if(scanner) scanner.stop(); }
-    
     function aplicarFiltros() { render(); toggleSidebar(); }
 
     function exportarCSV() {
