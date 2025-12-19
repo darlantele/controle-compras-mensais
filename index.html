@@ -2,10 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Purchase Pro v6.3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Purchase Pro v6.4</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
@@ -19,23 +19,21 @@
             --text-sub: #64748b;
         }
 
-        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg); color: var(--text-main); overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg); color: var(--text-main); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
 
-        /* HEADER */
+        /* HEADER FIXO */
         .header {
-            background: var(--primary); color: white; padding: 15px 20px;
+            background: var(--primary); color: white; padding: 12px 15px;
             display: flex; align-items: center; justify-content: space-between;
-            position: sticky; top: 0; z-index: 50;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .header h1 { font-size: 1.2rem; margin: 0; font-weight: 700; }
-        .menu-icon { cursor: pointer; display: flex; align-items: center; }
+        .header h1 { font-size: 1.1rem; margin: 0; font-weight: 700; }
 
-        /* SIDEBAR (Menu Lateral) */
+        /* MENU LATERAL MELHORADO */
         .sidebar {
             position: fixed; left: -280px; top: 0; width: 280px; height: 100%;
-            background: var(--card); z-index: 100; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 10px 0 20px rgba(0,0,0,0.1); padding: 25px; box-sizing: border-box;
+            background: var(--card); z-index: 100; transition: 0.3s ease;
+            box-shadow: 10px 0 20px rgba(0,0,0,0.1); padding: 20px; box-sizing: border-box;
         }
         .sidebar.active { left: 0; }
         .sidebar-overlay {
@@ -43,95 +41,88 @@
             background: rgba(0,0,0,0.4); display: none; z-index: 90; backdrop-filter: blur(2px);
         }
         .sidebar-overlay.active { display: block; }
-        .sidebar h2 { font-size: 1.1rem; color: var(--primary); margin-bottom: 25px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
 
-        /* FILTROS NO MENU */
-        .tool-box { margin-bottom: 25px; }
-        .tool-box label { font-size: 0.75rem; font-weight: bold; color: var(--text-sub); display: block; margin-bottom: 8px; text-transform: uppercase; }
-        .tool-box input { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; font-family: inherit; }
-
-        /* CONTAINER PRINCIPAL */
-        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        /* CONTAINER COM AJUSTE PARA CELULAR */
+        .container { max-width: 600px; margin: 15px auto; padding: 0 12px; box-sizing: border-box; }
         
-        /* CARD DE FORMULÁRIO */
-        .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.03); }
-        
-        /* AVISO DE HISTÓRICO INTELIGENTE */
-        #avisoHistorico {
-            display: none; background: #fffbeb; border-left: 4px solid var(--warning);
-            padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; color: #92400e; line-height: 1.5;
+        .card { 
+            background: var(--card); padding: 18px; border-radius: 18px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; 
+            border: 1px solid #f1f5f9; box-sizing: border-box; width: 100%;
         }
 
-        .form-row { display: flex; gap: 12px; margin-bottom: 15px; }
-        .form-group { flex: 1; display: flex; flex-direction: column; }
-        label { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-        input, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; background: #fcfcfc; transition: 0.2s; }
-        input:focus { border-color: var(--primary); outline: none; background: #fff; }
+        #avisoHistorico {
+            display: none; background: #fffbeb; border-left: 4px solid var(--warning);
+            padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; color: #92400e;
+        }
 
-        /* FEEDBACK DE CÁLCULO UNITÁRIO */
+        /* AJUSTE DOS CAMPOS PARA NÃO VAZAR */
+        .form-row { 
+            display: flex; gap: 10px; margin-bottom: 12px; width: 100%; 
+            flex-wrap: wrap; /* Permite quebrar linha se não couber */
+        }
+        .form-group { 
+            flex: 1; min-width: 120px; /* Garante tamanho mínimo no celular */
+            display: flex; flex-direction: column; 
+        }
+        .form-group.full { min-width: 100%; }
+
+        label { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; }
+        
+        input, select { 
+            padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; 
+            font-size: 1rem; background: #fcfcfc; width: 100%; box-sizing: border-box;
+            appearance: none; /* Melhora visual do select no iPhone */
+        }
+
         #calcFeedback { 
             font-size: 0.85rem; font-weight: 600; color: var(--primary); 
             background: #eff6ff; padding: 10px; border-radius: 10px; 
-            margin-bottom: 15px; display: none; text-align: center; border: 1px dashed var(--primary);
+            margin-bottom: 15px; text-align: center; border: 1px dashed var(--primary);
+            display: none;
         }
 
-        /* BOTÕES */
-        .btn-grid { display: grid; grid-template-columns: 1fr 64px; gap: 12px; margin-top: 10px; }
-        .btn-main { background: var(--primary); color: white; border: none; border-radius: 14px; padding: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
-        .btn-secondary { background: #f1f5f9; color: var(--text-main); border: none; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-main:active, .btn-secondary:active { transform: scale(0.96); }
+        .btn-grid { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-main { flex: 3; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-secondary { flex: 1; background: #f1f5f9; color: var(--text-main); border: none; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
 
-        /* DASHBOARD */
-        .total-banner { background: var(--text-main); color: white; padding: 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        /* DASHBOARD MOBILE FRIENDLY */
+        .total-banner { background: var(--text-main); color: white; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         
-        .search-bar { background: white; padding: 12px 16px; border-radius: 14px; display: flex; align-items: center; gap: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
-        .search-bar input { border: none; outline: none; width: 100%; font-size: 1rem; background: transparent; }
+        .search-bar { background: white; padding: 10px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
+        .search-bar input { border: none; outline: none; width: 100%; font-size: 1rem; }
 
-        /* LISTA DE ITENS */
-        #listaCompras { list-style: none; padding: 0; }
+        /* LISTA ESTILO CARD */
+        #listaCompras { list-style: none; padding: 0; margin: 0; }
         .item-card { 
-            background: white; padding: 18px; border-radius: 18px; margin-bottom: 12px; 
+            background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; 
             border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;
-            transition: 0.2s;
         }
-        .item-card:hover { border-color: var(--primary); }
-        .item-card b { font-size: 1.05rem; color: var(--text-main); }
-        .item-card small { color: var(--text-sub); font-size: 0.8rem; }
-        .price-display { color: var(--success); font-weight: 700; font-size: 1.15rem; margin-top: 4px; }
-        
-        .badge-qty { background: #f1f5f9; padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; color: var(--primary); }
+        .price-display { color: var(--success); font-weight: 700; font-size: 1.1rem; }
+        .badge-qty { background: #eff6ff; padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; color: var(--primary); font-weight: 700; }
 
-        .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
-        .modal-content { background: white; margin: 15% auto; padding: 25px; width: 85%; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
+        .modal { display: none; position: fixed; z-index: 200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 20px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div class="sidebar-overlay" id="overlay"></div>
 <div class="sidebar" id="sidebar">
-    <h2><span class="material-icons">tune</span> Ferramentas</h2>
-    
-    <div class="tool-box">
-        <label>Filtrar por Período</label>
-        <input type="date" id="filtroDataInicio">
-        <input type="date" id="filtroDataFim">
-        <button onclick="aplicarFiltros()" class="btn-main" style="width: 100%; font-size: 0.85rem; padding: 10px;">Aplicar Filtro</button>
+    <h2 style="font-size: 1rem; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+        <span class="material-icons" style="vertical-align: middle;">tune</span> Ferramentas
+    </h2>
+    <div style="margin-bottom: 20px;">
+        <label>Data Início</label><input type="date" id="filtroDataInicio">
+        <label>Data Fim</label><input type="date" id="filtroDataFim">
+        <button onclick="aplicarFiltros()" class="btn-main" style="width: 100%; padding: 10px; margin-top: 10px;">Filtrar</button>
     </div>
-
-    <div class="tool-box">
-        <label>Exportar Dados</label>
-        <button onclick="exportarCSV()" class="btn-secondary" style="width: 100%; padding: 12px; gap: 10px; font-size: 0.85rem;">
-            <span class="material-icons">table_view</span> Descarregar CSV
-        </button>
-    </div>
-
-    <div style="margin-top: 60px;">
-        <button onclick="toggleSidebar()" class="btn-secondary" style="width: 100%; background: #fff1f2; color: var(--danger);">Fechar Menu</button>
-    </div>
+    <button onclick="exportarCSV()" class="btn-secondary" style="width: 100%; padding: 12px; margin-bottom: 10px;">Exportar CSV</button>
+    <button onclick="toggleSidebar()" class="btn-secondary" style="width: 100%; background: #fff1f2; color: var(--danger); margin-top: 40px;">Fechar</button>
 </div>
 
 <div class="header">
-    <div class="menu-icon" onclick="toggleSidebar()"><span class="material-icons">menu</span></div>
+    <div onclick="toggleSidebar()"><span class="material-icons">menu</span></div>
     <h1>Smart Purchase</h1>
     <div style="width: 24px;"></div>
 </div>
@@ -139,46 +130,54 @@
 <div class="container">
     <div class="card">
         <div id="avisoHistorico"></div>
-        
         <form id="addCompraForm">
             <input type="hidden" id="edit-timestamp">
             
-            <label>Produto</label>
-            <input type="text" id="produto" required style="margin-bottom: 15px;" placeholder="O que comprou?">
+            <div class="form-group full">
+                <label>Produto</label>
+                <input type="text" id="produto" required placeholder="Ex: Café 500g" style="margin-bottom: 12px;">
+            </div>
 
             <div class="form-row">
-                <div class="form-group"><label>Qtd</label><input type="number" id="qtd" value="1" step="0.01" required></div>
-                <div class="form-group">
+                <div class="form-group" style="flex: 0.7;">
+                    <label>Qtd</label>
+                    <input type="number" id="qtd" value="1" step="0.01" required>
+                </div>
+                <div class="form-group" style="flex: 0.8;">
                     <label>Unid</label>
                     <select id="unidade">
                         <option value="un">un</option><option value="kg">kg</option>
                         <option value="g">g</option><option value="L">L</option><option value="ml">ml</option>
                     </select>
                 </div>
-                <div class="form-group"><label>R$ Preço Unit.</label><input type="number" id="precoUnit" step="0.01" required placeholder="0,00"></div>
+                <div class="form-group" style="flex: 1.2;">
+                    <label>Preço Unit.</label>
+                    <input type="number" id="precoUnit" step="0.01" required placeholder="0,00">
+                </div>
             </div>
 
             <div id="calcFeedback">Total: R$ 0,00</div>
 
             <div class="form-row">
-                <div class="form-group"><label>Cód. Barras (GTIN)</label><input type="text" id="gtin" placeholder="Opcional"></div>
-                <div class="form-group"><label>Local</label><select id="localSelect"></select></div>
+                <div class="form-group"><label>GTIN</label><input type="text" id="gtin"></div>
+                <div class="form-group">
+                    <label>Local</label>
+                    <select id="localSelect">
+                        <option>Carregando...</option>
+                    </select>
+                </div>
             </div>
 
             <div class="btn-grid">
-                <button type="submit" id="mainButton" class="btn-main"><span class="material-icons">add_shopping_cart</span> Salvar</button>
+                <button type="submit" id="mainButton" class="btn-main"><span class="material-icons">save</span> Salvar</button>
                 <button type="button" onclick="abrirScanner()" class="btn-secondary"><span class="material-icons">qr_code_scanner</span></button>
             </div>
-            
-            <button type="button" onclick="resetarForm()" class="btn-secondary" style="width: 100%; margin-top: 12px; background: transparent; border: 1px solid #e2e8f0; color: var(--text-sub); padding: 10px;">
-                <span class="material-icons" style="font-size: 1.1rem; margin-right: 5px;">refresh</span> Limpar Campos
-            </button>
         </form>
     </div>
 
     <div class="total-banner">
-        <span style="opacity: 0.9; font-size: 0.9rem; font-weight: 400;">Investimento Total</span>
-        <span id="totalGasto" style="font-size: 1.5rem;">R$ 0,00</span>
+        <span style="font-size: 0.85rem; opacity: 0.8;">Total no Período</span>
+        <span id="totalGasto" style="font-size: 1.3rem; font-weight: 700;">R$ 0,00</span>
     </div>
 
     <div class="search-bar">
@@ -189,21 +188,34 @@
     <ul id="listaCompras"></ul>
 </div>
 
-<div id="barcodeModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-top: 0; text-align: center;">Escanear Produto</h3>
-        <div id="reader" style="border-radius: 12px; overflow: hidden;"></div>
-        <button onclick="fecharScanner()" class="btn-secondary" style="width:100%; margin-top:20px; font-weight: 700;">Cancelar</button>
-    </div>
-</div>
+<div id="barcodeModal" class="modal"><div class="modal-content"><div id="reader"></div><button onclick="fecharScanner()" class="btn-secondary" style="width:100%; margin-top:15px;">Cancelar</button></div></div>
 
 <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVXCbI9Ihl3C9Yr-Jy8aowZXcfx3dSpAbQ1P8rUrPkOwSKjhnTlcTTPId7R1FYhpbRJQ/exec'; 
     let compras = [];
     let isEditing = false;
-    let html5QrcodeScanner;
+    let scanner;
 
-    // --- CÁLCULO DINÂMICO ---
+    // --- CORREÇÃO DO CARREGAMENTO DE LOCAIS ---
+    async function carregarTudo() {
+        try {
+            const [resD, resL] = await Promise.all([
+                fetch(`${WEB_APP_URL}?action=read`),
+                fetch(`${WEB_APP_URL}?action=getLocais`)
+            ]);
+            compras = (await resD.json()).data;
+            const locais = (await resL.json()).data;
+            
+            const selectLocal = document.getElementById('localSelect');
+            selectLocal.innerHTML = locais.map(l => `<option value="${l}">${l}</option>`).join('');
+            render();
+        } catch (e) { 
+            console.error("Erro ao carregar:", e);
+            document.getElementById('localSelect').innerHTML = "<option>Erro ao carregar</option>";
+        }
+    }
+
+    // --- LÓGICA DE CÁLCULO UNITÁRIO ---
     const qtdIn = document.getElementById('qtd');
     const precoIn = document.getElementById('precoUnit');
     const feed = document.getElementById('calcFeedback');
@@ -215,72 +227,17 @@
         if (total > 0) {
             feed.style.display = 'block';
             feed.textContent = `Total deste item: R$ ${total.toFixed(2).replace('.',',')}`;
-        } else {
-            feed.style.display = 'none';
-        }
+        } else { feed.style.display = 'none'; }
         return total;
     }
     qtdIn.oninput = updateCalculo;
     precoIn.oninput = updateCalculo;
 
-    // --- MENU LATERAL ---
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
     }
     document.getElementById('overlay').onclick = toggleSidebar;
-
-    // --- BUSCA HISTÓRICO COM LÓGICA UNITÁRIA ---
-    const verificarHistorico = async (gtin) => {
-        const aviso = document.getElementById('avisoHistorico');
-        if (!gtin || gtin === "S/G" || gtin.length < 8) {
-            aviso.style.display = 'none';
-            return;
-        }
-
-        try {
-            const res = await fetch(`${WEB_APP_URL}?action=buscarGTIN&gtin=${gtin}`);
-            const json = await res.json();
-
-            if (json.found) {
-                const h = json.data;
-                
-                document.getElementById('produto').value = h.produto;
-                document.getElementById('qtd').value = 1; 
-                document.getElementById('unidade').value = h.unidade;
-                
-                // LÓGICA GENIAL: Preço Total Antigo / Qtd Antiga = Preço Unitário Antigo
-                const pUnitAntigo = parseFloat(h.preco) / parseFloat(h.qtd);
-                const dias = Math.floor((new Date() - new Date(h.data)) / 86400000);
-                
-                aviso.style.display = 'block';
-                aviso.innerHTML = `💡 <b>Produto Reconhecido!</b><br>
-                    Último preço UNITÁRIO pago há ${dias} dias no "${h.local}": 
-                    <b style="color:var(--danger);">R$ ${pUnitAntigo.toFixed(2).replace('.',',')}</b><br>
-                    <small>Histórico: ${h.qtd}${h.unidade} por R$ ${parseFloat(h.preco).toFixed(2).replace('.',',')}</small>`;
-                
-                // Sugere o preço unitário antigo no campo para facilitar
-                document.getElementById('precoUnit').value = pUnitAntigo.toFixed(2);
-                updateCalculo();
-            }
-        } catch (e) { console.error(e); }
-    };
-
-    document.getElementById('gtin').onchange = (e) => verificarHistorico(e.target.value);
-
-    // --- CARREGAR E RENDERIZAR ---
-    async function carregarTudo() {
-        try {
-            const [resD, resL] = await Promise.all([
-                fetch(`${WEB_APP_URL}?action=read`),
-                fetch(`${WEB_APP_URL}?action=getLocais`)
-            ]);
-            compras = (await resD.json()).data;
-            const locais = (await resL.json()).data;
-            document.getElementById('localSelect').innerHTML = locais.map(l => `<option value="${l}">${l}</option>`).join('');
-            render();
-        } catch (e) { console.error(e); }
-    }
 
     function render() {
         const termo = document.getElementById('inputBusca').value.toLowerCase();
@@ -296,18 +253,18 @@
         });
 
         document.getElementById('listaCompras').innerHTML = filtrados.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(c => {
-            const pTotal = parseFloat(c.preco) || 0;
-            totalPeriodo += pTotal;
+            const p = parseFloat(c.preco) || 0;
+            totalPeriodo += p;
             return `
                 <li class="item-card">
-                    <div>
+                    <div style="max-width: 70%;">
                         <b>${c.produto} <span class="badge-qty">${c.qtd}${c.unidade}</span></b>
-                        <small>${new Date(c.data).toLocaleDateString()} • ${c.local}</small>
-                        <div class="price-display">R$ ${pTotal.toFixed(2).replace('.',',')}</div>
+                        <div style="font-size:0.75rem; color:var(--text-sub); margin-top:2px;">${new Date(c.data).toLocaleDateString()} • ${c.local}</div>
+                        <div class="price-display">R$ ${p.toFixed(2).replace('.',',')}</div>
                     </div>
-                    <div style="display:flex; gap:12px;">
-                        <span class="material-icons" style="color:var(--text-sub); cursor:pointer;" onclick="prepararEdicao('${c.timestamp}')">edit_note</span>
-                        <span class="material-icons" style="color:var(--danger); cursor:pointer;" onclick="excluirItem('${c.timestamp}')">delete_outline</span>
+                    <div style="display:flex; gap:10px;">
+                        <span class="material-icons" style="color:var(--text-sub); font-size: 1.4rem;" onclick="prepararEdicao('${c.timestamp}')">edit</span>
+                        <span class="material-icons" style="color:var(--danger); font-size: 1.4rem;" onclick="excluirItem('${c.timestamp}')">delete</span>
                     </div>
                 </li>
             `;
@@ -315,33 +272,25 @@
         document.getElementById('totalGasto').textContent = `R$ ${totalPeriodo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
     }
 
-    function aplicarFiltros() { render(); toggleSidebar(); }
-
-    // --- CRUD ---
     document.getElementById('addCompraForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('mainButton');
         btn.disabled = true;
-        
-        const valorFinal = updateCalculo(); // Pega o total (Qtd * Unitário)
-
+        const vFinal = updateCalculo();
         const dados = {
             data: new Date().toISOString().split('T')[0],
             produto: document.getElementById('produto').value,
             qtd: document.getElementById('qtd').value,
             unidade: document.getElementById('unidade').value,
-            preco: valorFinal, 
+            preco: vFinal,
             gtin: document.getElementById('gtin').value || "S/G",
             local: document.getElementById('localSelect').value
         };
-        
         const ts = document.getElementById('edit-timestamp').value;
         const action = isEditing ? 'update' : 'write';
-        let url = `${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}`;
-        if (isEditing) url += `&timestamp=${encodeURIComponent(ts)}`;
-
-        await fetch(url);
-        resetarForm();
+        await fetch(`${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+ts : ''}`);
+        document.getElementById('addCompraForm').reset();
+        isEditing = false; btn.disabled = false;
         carregarTudo();
     };
 
@@ -352,53 +301,36 @@
         document.getElementById('produto').value = item.produto;
         document.getElementById('qtd').value = item.qtd;
         document.getElementById('unidade').value = item.unidade;
-        
-        // Volta para o unitário para o formulário fazer sentido
-        const pUnit = parseFloat(item.preco) / parseFloat(item.qtd);
-        document.getElementById('precoUnit').value = pUnit.toFixed(2);
-        
+        document.getElementById('precoUnit').value = (parseFloat(item.preco) / parseFloat(item.qtd)).toFixed(2);
         document.getElementById('gtin').value = item.gtin;
         document.getElementById('localSelect').value = item.local;
         updateCalculo();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo(0,0);
     };
 
-    function resetarForm() {
-        isEditing = false;
-        document.getElementById('addCompraForm').reset();
-        document.getElementById('edit-timestamp').value = "";
-        document.getElementById('calcFeedback').style.display = 'none';
-        document.getElementById('avisoHistorico').style.display = 'none';
-        document.getElementById('mainButton').disabled = false;
-    }
-
-    window.excluirItem = async (ts) => { if(confirm("Eliminar este item?")) { await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`); carregarTudo(); } };
+    window.excluirItem = async (ts) => { if(confirm("Eliminar item?")) { await fetch(`${WEB_APP_URL}?action=delete&timestamp=${ts}`); carregarTudo(); } };
     document.getElementById('inputBusca').oninput = render;
 
-    // --- SCANNER ---
     function abrirScanner() {
         document.getElementById('barcodeModal').style.display = "block";
-        html5QrcodeScanner = new Html5Qrcode("reader");
-        html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+        scanner = new Html5Qrcode("reader");
+        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
             document.getElementById('gtin').value = text;
             fecharScanner();
-            verificarHistorico(text);
+            // Aqui você pode disparar a busca por GTIN se desejar
         }, () => {});
     }
-    function fecharScanner() { 
-        document.getElementById('barcodeModal').style.display = "none"; 
-        if(html5QrcodeScanner) html5QrcodeScanner.stop(); 
-    }
+    function fecharScanner() { document.getElementById('barcodeModal').style.display = "none"; if(scanner) scanner.stop(); }
+    
+    function aplicarFiltros() { render(); toggleSidebar(); }
 
     function exportarCSV() {
         let csv = "Data,Produto,Qtd,Unidade,GTIN,PrecoTotal,Local\n";
-        compras.forEach(c => {
-            csv += `${c.data.split('T')[0]},${c.produto},${c.qtd},${c.unidade},${c.gtin},${c.preco},${c.local}\n`;
-        });
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' }); // \ufeff para Excel ler acentos
+        compras.forEach(c => csv += `${c.data.split('T')[0]},${c.produto},${c.qtd},${c.unidade},${c.gtin},${c.preco},${c.local}\n`);
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "historico_compras.csv";
+        link.download = "compras.csv";
         link.click();
     }
 
