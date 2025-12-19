@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Purchase Pro v7.5</title>
+    <title>Smart Purchase Pro v7.6</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -19,44 +19,48 @@
         .header { background: var(--primary); color: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
         .header h1 { font-size: 1.1rem; margin: 0; font-weight: 700; flex-grow: 1; text-align: center; }
 
-        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--card); z-index: 100; transition: 0.3s ease; box-shadow: 10px 0 20px rgba(0,0,0,0.1); padding: 20px; box-sizing: border-box; }
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--card); z-index: 100; transition: 0.3s ease; box-shadow: 10px 0 20px rgba(0,0,0,0.1); padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .sidebar.active { left: 0; }
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; z-index: 90; backdrop-filter: blur(2px); }
         .sidebar-overlay.active { display: block; }
-        .menu-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 12px; cursor: pointer; margin-bottom: 5px; color: var(--text-main); font-weight: 600; }
+        
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 10px; cursor: pointer; margin-bottom: 5px; color: var(--text-main); font-weight: 600; }
         .menu-item.active { background: #eff6ff; color: var(--primary); }
 
         .view-section { display: none; padding: 15px; max-width: 600px; margin: auto; }
         .view-section.active { display: block; }
 
-        .card { background: var(--card); padding: 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #f1f5f9; box-sizing: border-box; }
-        .form-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; width: 100%; }
-        .form-group { flex: 1; min-width: 110px; display: flex; flex-direction: column; box-sizing: border-box; }
-        input, select { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; width: 100%; box-sizing: border-box; background: #fcfcfc; height: 48px; }
-        label { font-size: 0.7rem; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; }
-
-        .btn-main { width: 100%; background: var(--primary); color: white; border: none; border-radius: 12px; padding: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-        .btn-secondary { background: #f1f5f9; color: var(--text-main); border: none; border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .btn-outline { background: transparent; border: 1px solid #e2e8f0; color: var(--text-sub); border-radius: 12px; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-        #calcFeedback { font-size: 0.85rem; font-weight: 600; color: var(--primary); background: #eff6ff; padding: 10px; border-radius: 10px; margin-bottom: 15px; text-align: center; display: none; border: 1px dashed var(--primary); }
-
-        .total-banner { background: var(--text-main); color: white; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card { background: var(--card); padding: 18px; border-radius: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #f1f5f9; box-sizing: border-box; width: 100%; }
         
-        /* CARD DO ÚLTIMO ITEM */
-        .ultimo-item-card { background: #fff; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+        .form-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; width: 100%; }
+        .form-group { flex: 1; min-width: 100px; display: flex; flex-direction: column; box-sizing: border-box; }
+        
+        /* FIX TOTAL DOS INPUTS - IGUALANDO ALTURA E LARGURA */
+        input, select { 
+            height: 45px; padding: 0 12px; border: 1px solid #e2e8f0; border-radius: 10px; 
+            font-size: 1rem; width: 100%; box-sizing: border-box; background: #fcfcfc;
+            -webkit-appearance: none; /* Remove estilo Safari */
+        }
+        
+        label { font-size: 0.65rem; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; }
 
-        .search-bar { background: white; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; margin-bottom: 10px; }
-        .search-bar input { border: none; outline: none; width: 100%; font-size: 1rem; height: auto; background: transparent; }
+        .btn-main { width: 100%; background: var(--primary); color: white; border: none; border-radius: 10px; padding: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+        .btn-secondary { background: #f1f5f9; color: var(--text-main); border: none; border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .btn-outline { background: transparent; border: 1px solid #e2e8f0; color: var(--text-sub); border-radius: 10px; padding: 10px; width: 100%; margin-top: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; }
 
-        /* LISTA RESULTADOS */
-        .item-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        #calcFeedback { font-size: 0.8rem; font-weight: 600; color: var(--primary); background: #eff6ff; padding: 8px; border-radius: 10px; margin-bottom: 12px; text-align: center; display: none; border: 1px dashed var(--primary); }
 
-        .price-display { color: var(--success); font-weight: 700; font-size: 1.1rem; }
+        .total-banner { background: var(--text-main); color: white; padding: 15px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        .ultimo-item-card { background: #fff; padding: 14px; border-radius: 12px; border-left: 4px solid var(--primary); margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); border-top: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; }
 
-        /* FALTAS */
-        .falta-item { cursor: pointer; transition: 0.2s; border-left: 4px solid var(--warning); }
+        .search-bar { background: white; padding: 10px; border-radius: 10px; display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px; }
+        .search-bar input { border: none; outline: none; width: 100%; font-size: 0.95rem; height: 35px; background: transparent; }
+
+        .item-card { background: white; padding: 14px; border-radius: 14px; margin-bottom: 8px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .price-display { color: var(--success); font-weight: 700; font-size: 1.05rem; }
+
+        .falta-item { cursor: pointer; border-left: 4px solid var(--warning); }
         .falta-item.riscado { opacity: 0.5; background: #f8fafc; border-left-color: #cbd5e1; }
         .falta-item.riscado b { text-decoration: line-through; color: var(--text-sub); }
 
@@ -68,22 +72,27 @@
 
 <div class="sidebar-overlay" id="overlay"></div>
 <div class="sidebar" id="sidebar">
-    <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 20px;">Menu</h2>
+    <h2 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 15px;">Menu</h2>
     <div class="menu-item active" id="m-compras" onclick="switchView('compras')"><span class="material-icons">shopping_cart</span> Registro</div>
     <div class="menu-item" id="m-faltas" onclick="switchView('faltas')"><span class="material-icons">fact_check</span> Lista de Faltas</div>
     <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
-    <div style="padding: 0 10px;">
-        <label>Período das Consultas</label>
-        <input type="date" id="filtroDataInicio" style="margin-bottom: 8px; font-size: 0.8rem;">
-        <input type="date" id="filtroDataFim" style="margin-bottom: 15px; font-size: 0.8rem;">
+    
+    <div style="padding: 0 5px;">
+        <label>Filtrar por Período</label>
+        <input type="date" id="filtroDataInicio" style="margin-bottom: 8px;">
+        <input type="date" id="filtroDataFim" style="margin-bottom: 8px;">
+        <button onclick="aplicarFiltros()" class="btn-main" style="padding: 10px; background: var(--text-main);">
+            <span class="material-icons" style="font-size: 1rem;">filter_list</span> Filtrar Agora
+        </button>
     </div>
-    <button onclick="exportarCSV()" class="btn-secondary" style="width: 90%; margin: 10px auto; font-size: 0.8rem; gap: 8px;"><span class="material-icons">download</span> Exportar CSV</button>
+
+    <button onclick="exportarCSV()" class="btn-secondary" style="width: 100%; margin-top: 20px; font-size: 0.85rem; gap: 8px;"><span class="material-icons">download</span> Exportar CSV</button>
     <button onclick="toggleSidebar()" class="btn-outline" style="margin-top: 30px; border-color: var(--danger); color: var(--danger);">Fechar</button>
 </div>
 
 <div class="header">
     <div onclick="toggleSidebar()"><span class="material-icons">menu</span></div>
-    <h1 id="view-title">Smart Purchase</h1>
+    <h1>Smart Purchase</h1>
     <div onclick="location.reload(true)"><span class="material-icons">refresh</span></div>
 </div>
 
@@ -92,11 +101,11 @@
         <form id="addCompraForm">
             <input type="hidden" id="edit-timestamp">
             <label>Produto</label>
-            <input type="text" id="produto" required placeholder="Nome do item" style="margin-bottom: 12px;">
+            <input type="text" id="produto" required placeholder="Ex: Arroz" style="margin-bottom: 12px;">
             <div class="form-row">
                 <div class="form-group" style="flex: 0.6;"><label>Qtd</label><input type="number" id="qtd" value="1" step="0.01"></div>
                 <div class="form-group" style="flex: 0.7;"><label>Unid</label><select id="unidade"><option value="un">un</option><option value="kg">kg</option><option value="g">g</option><option value="L">L</option><option value="ml">ml</option></select></div>
-                <div class="form-group" style="flex: 1;"><label>R$ Preço Unit.</label><input type="number" id="precoUnit" step="0.01" required></div>
+                <div class="form-group" style="flex: 1.2;"><label>Preço Unit.</label><input type="number" id="precoUnit" step="0.01" required></div>
             </div>
             <div id="calcFeedback">Total: R$ 0,00</div>
             <div class="form-row">
@@ -113,11 +122,10 @@
     </div>
 
     <div class="total-banner"><span>Total Exibido</span><b id="totalGasto">R$ 0,00</b></div>
-
     <div id="containerUltimo"></div>
 
     <div class="search-bar">
-        <span class="material-icons">search</span>
+        <span class="material-icons" style="font-size: 1.2rem; color: var(--text-sub);">search</span>
         <input type="text" id="inputBusca" placeholder="Pesquisar histórico...">
     </div>
     <div id="listaCompras"></div>
@@ -125,10 +133,10 @@
 
 <div id="view-faltas" class="view-section">
     <div class="card">
-        <label>Nova Falta</label>
-        <div style="display: flex; gap: 10px; margin-top: 5px;">
-            <input type="text" id="itemFalta" placeholder="O que falta?" style="flex-grow: 1;">
-            <button onclick="addFalta()" class="btn-main" style="width: auto; padding: 0 20px;"><span class="material-icons">add</span></button>
+        <label>O que falta em casa?</label>
+        <div style="display: flex; gap: 8px; margin-top: 5px;">
+            <input type="text" id="itemFalta" placeholder="Adicionar item..." style="flex-grow: 1;">
+            <button onclick="addFalta()" class="btn-main" style="width: 50px; padding: 0;"><span class="material-icons">add</span></button>
         </div>
     </div>
     <div id="listaFaltasContainer"></div>
@@ -190,88 +198,43 @@
             return matchBusca && matchData;
         }).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        // MOSTRAR APENAS O ÚLTIMO ITEM FIXO SE NÃO HOUVER BUSCA
-        if (compras.length > 0 && termo === "") {
+        if (compras.length > 0 && termo === "" && dIni === "") {
             const u = compras.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
-            containerUltimo.innerHTML = `
-                <div class="ultimo-item-card" onclick="prepararEdicao('${u.timestamp}')">
-                    <div style="font-size:0.7rem; color:var(--text-sub); margin-bottom:4px;">ÚLTIMO LANÇAMENTO:</div>
-                    <b>${u.produto} <small>${u.qtd}${u.unidade}</small></b>
-                    <div class="price-display">R$ ${parseFloat(u.preco).toFixed(2).replace('.',',')}</div>
-                </div>`;
-        } else {
-            containerUltimo.innerHTML = "";
-        }
+            containerUltimo.innerHTML = `<div class="ultimo-item-card" onclick="prepararEdicao('${u.timestamp}')"><div style="font-size:0.6rem; color:var(--text-sub); margin-bottom:2px;">ÚLTIMO REGISTRO:</div><b>${u.produto} <small>${u.qtd}${u.unidade}</small></b><div class="price-display">R$ ${parseFloat(u.preco).toFixed(2).replace('.',',')}</div></div>`;
+        } else { containerUltimo.innerHTML = ""; }
 
-        // MOSTRAR LISTA APENAS SE ESTIVER BUSCANDO OU FILTRANDO
         if (termo !== "" || dIni !== "" || dFim !== "") {
-            container.innerHTML = filtrados.map(c => {
-                const p = parseFloat(c.preco) || 0;
-                total += p;
-                return `
-                    <div class="item-card">
-                        <div style="max-width: 75%;">
-                            <b>${c.produto} <small>${c.qtd}${c.unidade}</small></b>
-                            <small style="color:var(--text-sub)">${new Date(c.data).toLocaleDateString()} • ${c.local}</small>
-                            <div class="price-display">R$ ${p.toFixed(2).replace('.',',')}</div>
-                        </div>
-                        <div style="display:flex; gap:12px;">
-                            <span class="material-icons" style="color:var(--text-sub)" onclick="prepararEdicao('${c.timestamp}')">edit</span>
-                            <span class="material-icons" style="color:var(--danger)" onclick="excluirItem('${c.timestamp}')">delete_outline</span>
-                        </div>
-                    </div>`;
-            }).join('');
-        } else {
-            container.innerHTML = "";
-            // Recalcula o total apenas para o banner
-            filtrados.forEach(c => total += parseFloat(c.preco));
-        }
+            container.innerHTML = filtrados.map(c => `<div class="item-card"><div><b>${c.produto} <small>${c.qtd}${c.unidade}</small></b><small style="display:block; color:var(--text-sub)">${new Date(c.data).toLocaleDateString()} • ${c.local}</small><div class="price-display">R$ ${parseFloat(c.preco).toFixed(2).replace('.',',')}</div></div><div style="display:flex; gap:10px;"><span class="material-icons" style="color:var(--text-sub)" onclick="prepararEdicao('${c.timestamp}')">edit</span><span class="material-icons" style="color:var(--danger)" onclick="excluirItem('${c.timestamp}')">delete</span></div></div>`).join('');
+        } else { container.innerHTML = ""; }
+        
+        filtrados.forEach(c => total += parseFloat(c.preco));
         document.getElementById('totalGasto').textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
     }
 
     document.getElementById('inputBusca').oninput = renderCompras;
+    function aplicarFiltros() { renderCompras(); toggleSidebar(); }
 
-    // --- FALTAS ---
     function addFalta() {
         const input = document.getElementById('itemFalta');
         if(!input.value) return;
         faltas.push({ id: Date.now(), produto: input.value, noCarrinho: false });
-        input.value = "";
-        salvarFaltas();
+        input.value = ""; salvarFaltas();
     }
     function salvarFaltas() { localStorage.setItem('faltas', JSON.stringify(faltas)); renderFaltas(); }
     function renderFaltas() {
         const container = document.getElementById('listaFaltasContainer');
         const ordenadas = [...faltas].sort((a, b) => a.noCarrinho - b.noCarrinho);
-        container.innerHTML = ordenadas.map(f => `
-            <div class="item-card falta-item ${f.noCarrinho ? 'riscado' : ''}">
-                <div onclick="toggleCarrinho(${f.id})" style="display:flex; align-items:center; gap:10px; flex-grow:1;">
-                    <span class="material-icons">${f.noCarrinho ? 'check_circle' : 'radio_button_unchecked'}</span>
-                    <b>${f.produto}</b>
-                </div>
-                <div style="display:flex; gap:15px;">
-                    <span class="material-icons" style="color:var(--primary)" onclick="marcarComoComprado('${f.produto}', ${f.id})">shopping_basket</span>
-                    <span class="material-icons" style="color:var(--danger)" onclick="removerFalta(${f.id})">delete</span>
-                </div>
-            </div>`).join('');
+        container.innerHTML = ordenadas.map(f => `<div class="item-card falta-item ${f.noCarrinho ? 'riscado' : ''}"><div onclick="toggleCarrinho(${f.id})" style="display:flex; align-items:center; gap:8px; flex-grow:1;"><span class="material-icons" style="font-size:1.2rem;">${f.noCarrinho ? 'check_circle' : 'radio_button_unchecked'}</span><b>${f.produto}</b></div><div style="display:flex; gap:15px;"><span class="material-icons" style="color:var(--primary)" onclick="marcarComoComprado('${f.produto}', ${f.id})">add_shopping_cart</span><span class="material-icons" style="color:var(--danger)" onclick="removerFalta(${f.id})">delete</span></div></div>`).join('');
     }
     function toggleCarrinho(id) { const i = faltas.findIndex(f => f.id === id); faltas[i].noCarrinho = !faltas[i].noCarrinho; salvarFaltas(); }
     function removerFalta(id) { faltas = faltas.filter(f => f.id !== id); salvarFaltas(); }
     function marcarComoComprado(nome, id) { switchView('compras'); document.getElementById('produto').value = nome; removerFalta(id); window.scrollTo(0,0); }
 
-    // --- CRUD ---
     document.getElementById('addCompraForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('mainButton'); btn.disabled = true;
         const total = updateCalculo();
-        const dados = {
-            data: document.getElementById('dataCompra').value,
-            produto: document.getElementById('produto').value,
-            qtd: document.getElementById('qtd').value,
-            unidade: document.getElementById('unidade').value,
-            preco: total, gtin: document.getElementById('gtin').value || "S/G",
-            local: document.getElementById('localSelect').value
-        };
+        const dados = { data: document.getElementById('dataCompra').value, produto: document.getElementById('produto').value, qtd: document.getElementById('qtd').value, unidade: document.getElementById('unidade').value, preco: total, gtin: document.getElementById('gtin').value || "S/G", local: document.getElementById('localSelect').value };
         const ts = document.getElementById('edit-timestamp').value;
         const action = isEditing ? 'update' : 'write';
         await fetch(`${WEB_APP_URL}?action=${action}&data=${encodeURIComponent(JSON.stringify(dados))}${isEditing ? '&timestamp='+ts : ''}`);
